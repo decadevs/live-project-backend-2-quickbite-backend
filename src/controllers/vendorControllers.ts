@@ -1,133 +1,337 @@
+import { Request, Response, NextFunction } from "express";
+import { v4 } from "uuid";
+import {  GenerateSalt, passWordGenerator, hashPassword, GenerateSignature,} from "../utils/helpers";
+import { axiosVerifyVendor } from "../utils/helpers";
+import { JwtPayload } from "jsonwebtoken";
+import { VendorAttributes, VendorInstance } from "../models/vendorModel";
+import { emailHtml, sendmail } from "../utils/emailFunctions";
+import { GMAIL_USER } from "../config";
+import { zodSchema, validateFoodSchema } from "../utils/validators";
+import { FoodAttributes, FoodInstance } from "../models/foodModel";
 
-import { Request, Response, NextFunction } from 'express';
-import { v4 } from 'uuid';
-import {GenerateSalt, passWordGenerator, hashPassword, GenerateSignature} from "../utils/helpers"
-import { axiosVerifyVendor } from '../utils/helpers';
-import { JwtPayload } from 'jsonwebtoken';
-import { VendorAttributes, VendorInstance } from '../models/vendorModel'
-import { emailHtml, sendmail } from '../utils/emailFunctions';
-import { GMAIL_USER } from '../config';
-import {zodSchema, validateFoodSchema} from '../utils/validators'
-import { FoodAttributes, FoodInstance } from '../models/foodModel';
-
-
-
-
-export const verifyVendor = async (req: Request, res: Response, next:NextFunction) => {
-    try{
-        const regNo:any = req.query.regNo;
-           if(!regNo){
-                return res.status(404).json({
-                    message: `Registration Number is required`
-                })
-           }
-
-           const validateRegNo = /^AC-\d{8}$/
-
-           if(!validateRegNo.test(regNo)){
-            return res.status(400).json({
-                message: `${regNo} is not valid`
-            })
-           }
-
-           const verifiedRegNo = await axiosVerifyVendor(regNo)
-             if(verifiedRegNo === "not found"){
-                return res.status(404).json({
-                    message: `The business is not found`
-                })
-             }
-      
-          const token = await GenerateSignature({regNo:verifiedRegNo.findCompany.reg_no}) 
-      
- 
-        res.cookie( "token", token)
-        return res.status(200).json({
-            message: `${verifiedRegNo.findCompany.company_name} is verified`,
-            company_Name: `${verifiedRegNo.findCompany.company_name}`,
-            registration_Number: `${verifiedRegNo.findCompany.reg_no}`
-            
-        })
-            
-    }catch(err:any){
-        console.log(err.message)
-        return res.status(500).json({
-            message: `Internal server error`
-        })
+export const verifyVendor = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const regNo: any = req.query.regNo;
+    if (!regNo) {
+      return res.status(404).json({
+        message: `Registration Number is required`,
+      });
     }
-}
 
-export const registerVendor = async (req:JwtPayload, res: Response, next: NextFunction) => {
-    try{
+    const validateRegNo = /^AC-\d{8}$/;
 
-        let newUser = req.body;
+    if (!validateRegNo.test(regNo)) {
+      return res.status(400).json({
+        message: `${regNo} is not valid`,
+      });
+    }
 
-        const error = zodSchema.safeParse(newUser);
-        if (error.success === false) {
-          res.status(400).send({
-            error: error.error.issues[0].message
+    const verifiedRegNo = await axiosVerifyVendor(regNo);
+    if (verifiedRegNo === "not found") {
+      return res.status(404).json({
+        message: `The business is not found`,
+      });
+    }
+
+    const token = await GenerateSignature({
+      regNo: verifiedRegNo.findCompany.reg_no,
+    });
+
+    res.cookie("token", token);
+    return res.status(200).json({
+      message: `${verifiedRegNo.findCompany.company_name} is verified`,
+      company_Name: `${verifiedRegNo.findCompany.company_name}`,
+      registration_Number: `${verifiedRegNo.findCompany.reg_no}`,
+    });
+  } catch (err: any) {
+    console.log(err.message);
+    return res.status(500).json({
+      message: `Internal server error`,
+    });
+  }
+};
+
+export const registerVendor = async (
+  req: JwtPayload,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    let newUser = req.body;
+
+    const error = zodSchema.safeParse(newUser);
+    if (error.success === false) {
+      res.status(400).send({
+        error: error.error.issues[0].message,
+      });
+      return;
+    }
+
+    const id = v4();
+    const userId = req.regNo;
+    const registeredBusiness = await axiosVerifyVendor(userId);
+
+    const {
+      email,
+      phone_no,
+      name_of_owner,
+      restaurant_name,
+      address,
+      cover_image,
+    } = req.body;
+
+    const verifyIfVendorExistByEmail = (await VendorInstance.findOne({
+      where: { email: email },
+    })) as unknown as VendorAttributes;
+    const verifyIfVendorExistByRestaurantName = (await VendorInstance.findOne({
+      where: { restaurant_name: restaurant_name },
+    })) as unknown as VendorAttributes;
+
+    if (verifyIfVendorExistByEmail || verifyIfVendorExistByRestaurantName) {
+      return res.status(400).json({
+        Message: `Profile is already in use`,
+      });
+    }
+
+    const salt = await GenerateSalt();
+    const password = await passWordGenerator(phone_no);
+    const hash = await hashPassword(password, salt);
+    const html = emailHtml(email, password);
+
+    const newVendor = (await VendorInstance.create({
+      id,
+      email,
+      restaurant_name,
+      name_of_owner,
+      company_name: registeredBusiness.findCompany.company_name,
+      password: hash,
+      address,
+      phone_no,
+      isAvailable: true,
+      role: "vendor",
+      salt,
+      cover_image: req.file.path,
+      rating: 0,
+      orders: 0,
+    })) as unknown as VendorAttributes;
+
+    if (!newVendor) {
+      return res.status(400).json({
+        message: `Vendor's profile couldn't be created`,
+      });
+    }
+    if (newVendor) {
+      const vend = (await VendorInstance.findOne({
+        where: { id: id },
+      })) as unknown as VendorAttributes;
+      await sendmail(GMAIL_USER!, email, "Welcome", html);
+      console.log(vend);
+      const token = await GenerateSignature({ email: vend.email, id: vend.id });
+      res.cookie("token", token);
+      return res.status(200).json({
+        message: `Vendor created successfully`,
+        vend,
+        token,
+      });
+    }
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({
+      message: `Internal Server Error`,
+    });
+  }
+};
+
+
+// Vendor Creates Food
+export const vendorcreatesFood = async (
+  req: JwtPayload,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    let userId = v4();
+    const venid = req.user.id;
+
+    const { name, price, food_image, ready_time, description } = req.body;
+
+    const error = validateFoodSchema.safeParse(req.body);
+    if (error.success === false) {
+      res.status(400).send({
+        error: error.error.issues[0].message,
+      });
+      return;
+    }
+
+    const existingFood = (await FoodInstance.findOne({
+      where: { name: name },
+    })) as unknown as FoodAttributes;
+
+    if (existingFood) {
+      return res.send({
+        message: `Food exists`,
+      });
+    }
+    // Create a new food object
+    const newFood = (await FoodInstance.create({
+      id: userId,
+      order_count: 0,
+      name,
+      date_created: new Date(),
+      date_updated: new Date(),
+      vendorId: venid,
+      price,
+      food_image: req.file.path,
+      ready_time,
+      isAvailable: true,
+      rating: 0,
+      description,
+    })) as unknown as FoodAttributes;
+
+    console.log(newFood.vendorId);
+    if (newFood)
+      return res
+        .status(200)
+        .json({ msg: `Food created successfully`, newFood });
+    return res.status(400).json({ msg: `Unable to create` });
+  } catch (err: any) {
+    console.log(err.message);
+    return res.status(500).json({
+      message: `Internal Server Error.`,
+    });
+  }
+};
+
+// Vendor Get All Food
+export const vendorgetsAllFood = async (
+  req: JwtPayload,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const vendorId = req.user.id;
+    const allFood = await FoodInstance.findAll({
+      where: {
+        vendorId: vendorId,
+      },
+    });
+    return res.status(200).json({ allFood });
+  } catch (err: any) {
+    console.log(err.message);
+    return res.status(500).json({
+      message: `Internal Server Error`,
+    });
+  }
+};
+
+// Vendor Get Single Food
+export const vendorGetsSingleFood = async (req: JwtPayload, res: Response) => {
+  try {
+    const vendorId = req.user.id;
+    const foodid = req.query.foodid;
+    const food = (await FoodInstance.findOne({
+      where: { id: foodid, vendorId: vendorId },
+    })) as unknown as FoodAttributes;
+    if (!food) return res.status(400).json({ msg: `Unable to fetch food` });
+    return res.status(200).json({
+      msg: `Here is your food`,
+      food,
+    });
+  } catch (err: any) {
+    console.log(err.message);
+    return res.status(500).json({
+      msg: `Internal server error`,
+    });
+  }
+};
+
+ export const getPopularVendors = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      let page = 1;
+      if (req.query.page) {
+        page = parseInt(req.query.page as string);
+        if (Number.isNaN(page)) {
+          return res.status(400).json({
+            message: "Invalid page number",
           });
-          return;
         }
-
-        const id = v4()
-        const userId = req.regNo
-        const registeredBusiness = await axiosVerifyVendor(userId)
-       
-        const {email, phone_no, name_of_owner, restaurant_name, address, cover_image} = req.body
-
-        const verifyIfVendorExistByEmail = await VendorInstance.findOne({where:{email:email}}) as unknown as VendorAttributes
-        const verifyIfVendorExistByRestaurantName = await VendorInstance.findOne({where:{restaurant_name:restaurant_name}}) as unknown as VendorAttributes
-
-        if( verifyIfVendorExistByEmail || verifyIfVendorExistByRestaurantName ){
-            return res.status(400).json({
-                Message: `Profile is already in use`
-            })
+      }
+  
+      const pageSize = 10;
+      const offset = (page - 1) * pageSize;
+  
+      const vendors: any = await VendorInstance.findAll({});
+      const totalPages = Math.ceil(vendors.length / pageSize);
+  
+      if (page > totalPages) {
+        page = totalPages;
+      }
+  
+      const totalVendors = [];
+      for (let key of vendors) {
+        if (key.orders >= 10) {
+          totalVendors.push(key);
         }
-
-        const salt = await GenerateSalt()
-        const password = await passWordGenerator(phone_no)
-        const hash = await hashPassword(password, salt)
-        const html = emailHtml(email, password)
-
-        const newVendor = await VendorInstance.create({
-            id,
-            email,
-            restaurant_name,
-            name_of_owner,
-            company_name: registeredBusiness.findCompany.company_name,
-            password:hash,
-            address,
-            phone_no,
-            isAvailable:true,
-            role: "vendor",
-            salt,
-            cover_image: req.file.path,
-            rating:0,
-            orders:0
-       }) as unknown as VendorAttributes
-
-         if(!newVendor){
-            return res.status(400).json({
-                message: `Vendor's profile couldn't be created`
-            })
-         }
-         if(newVendor){
-            const vend = await VendorInstance.findOne({where:{id:id}}) as unknown as VendorAttributes
-            await sendmail(GMAIL_USER!, email, "Welcome",html )
-           console.log(vend)
-            const token = await GenerateSignature({email:vend.email, id:vend.id})
-            res.cookie("token", token)
-            return res.status(200).json({
-              message: `Vendor created successfully`,
-              vend,
-              token
-            })
-         }
-
-     }catch(err){
-        console.log(err)
-        return res.status(500).json({
-            message: `Internal Server Error`
-        })
+      }
+      const popularVendors = vendors.slice(offset, page * pageSize);
+  
+      return res.status(200).json({
+        popularVendors,
+        currentPage: page,
+        totalPages,
+      });
+    } catch (err) {
+      console.error("Error executing getUsers:", err);
+      return res.status(500).json({
+        Error: "Internal Server Error",
+      });
     }
- }
+  };
+
+  export const getAllVendors = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      let page = 1;
+      if (req.query.page) {
+        page = parseInt(req.query.page as string);
+        if (Number.isNaN(page)) {
+          return res.status(400).json({
+            message: "Invalid page number",
+          });
+        }
+      }  
+  
+      const pageSize = 10;
+      const offset = (page - 1) * pageSize;
+  
+      const vendors = await VendorInstance.findAll();
+      const totalPages = Math.ceil(vendors.length / pageSize);
+  
+      if (page > totalPages) {
+        page = totalPages;
+      }
+      const allVendors = vendors.slice(offset, page * pageSize);
+  
+      return res.status(200).json({
+        allVendors,
+        currentPage: page,
+        totalPages,
+      });
+    } catch (err) {
+      console.error("Error executing getUsers:", err);
+      return res.status(500).json({
+        Error: "Internal Server Error",
+      });
+    }
+  };
