@@ -248,3 +248,90 @@ export const vendorGetsSingleFood = async (req: JwtPayload, res: Response) => {
     });
   }
 };
+
+ export const getPopularVendors = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      let page = 1;
+      if (req.query.page) {
+        page = parseInt(req.query.page as string);
+        if (Number.isNaN(page)) {
+          return res.status(400).json({
+            message: "Invalid page number",
+          });
+        }
+      }
+  
+      const pageSize = 10;
+      const offset = (page - 1) * pageSize;
+  
+      const vendors: any = await VendorInstance.findAll({});
+      const totalPages = Math.ceil(vendors.length / pageSize);
+  
+      if (page > totalPages) {
+        page = totalPages;
+      }
+  
+      const totalVendors = [];
+      for (let key of vendors) {
+        if (key.orders >= 10) {
+          totalVendors.push(key);
+        }
+      }
+      const popularVendors = vendors.slice(offset, page * pageSize);
+  
+      return res.status(200).json({
+        popularVendors,
+        currentPage: page,
+        totalPages,
+      });
+    } catch (err) {
+      console.error("Error executing getUsers:", err);
+      return res.status(500).json({
+        Error: "Internal Server Error",
+      });
+    }
+  };
+
+  export const getAllVendors = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      let page = 1;
+      if (req.query.page) {
+        page = parseInt(req.query.page as string);
+        if (Number.isNaN(page)) {
+          return res.status(400).json({
+            message: "Invalid page number",
+          });
+        }
+      }  
+  
+      const pageSize = 10;
+      const offset = (page - 1) * pageSize;
+  
+      const vendors = await VendorInstance.findAll();
+      const totalPages = Math.ceil(vendors.length / pageSize);
+  
+      if (page > totalPages) {
+        page = totalPages;
+      }
+      const allVendors = vendors.slice(offset, page * pageSize);
+  
+      return res.status(200).json({
+        allVendors,
+        currentPage: page,
+        totalPages,
+      });
+    } catch (err) {
+      console.error("Error executing getUsers:", err);
+      return res.status(500).json({
+        Error: "Internal Server Error",
+      });
+    }
+  };
