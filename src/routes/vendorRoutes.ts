@@ -1,8 +1,8 @@
 import express from "express";
 import { authForVerifiedVendor, auth, vendorauth } from "../middleware/authorizations";
 import { upload } from "../middleware/upload";
-import {vendorcreatesFood,vendorLogin, getSingleVendor,
-    vendorChangeLoginPassword, vendorEditProfile,
+import {vendorcreatesFood,vendorLogin, vendorGetsProfile,
+    vendorChangePassword, vendorEditProfile,
     vendorgetsAllHisFood, vendorGetsSingleFood,
     verifyVendor, registerVendor } from "../controllers/vendorControllers";
 
@@ -14,9 +14,9 @@ router.post("/createfood", vendorauth, upload.single("food_image"), vendorcreate
 router.get("/getallfood", vendorauth, vendorgetsAllHisFood);
 router.get("/getsinglefood", vendorauth, vendorGetsSingleFood);
 router.post('/login', vendorLogin)
-router.post('/loginpasswordchange', vendorauth, vendorChangeLoginPassword)
-router.patch('/editprofile', vendorauth, vendorEditProfile)
-router.get('/getsingleprofile', vendorauth, getSingleVendor)
+router.post('/loginpasswordchange', vendorauth, vendorChangePassword)
+router.patch('/editprofile', vendorauth, upload.single("cover_image"), vendorEditProfile)
+router.get('/getsingleprofile', vendorauth, vendorGetsProfile)
 
 
 export default router;
