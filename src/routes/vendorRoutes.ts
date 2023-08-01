@@ -21,5 +21,4 @@ router.patch('/editprofile', auth, vendorEditProfile)
 router.get('/getsingleprofile', auth, getSingleVendor)
 
 
-
 export default router;
