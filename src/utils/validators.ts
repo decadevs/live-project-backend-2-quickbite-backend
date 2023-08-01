@@ -37,3 +37,8 @@ export const validateFoodSchema = z.object({
   ready_time: z.string({required_error: "ready time is required"}),
   description: z.string({required_error: "food description is required"}),
 })
+
+export const vendorLoginSchema = z.object({
+  email:z.string({required_error:"email is required"}).email({message:"invalid email"}),
+  password:z.string({required_error:"password is required"})
+})
