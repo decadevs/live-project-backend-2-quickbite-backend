@@ -155,8 +155,8 @@ export const vendorcreatesFood = async (
   next: NextFunction
 ) => {
   try {
-    let userId = v4();
-    const venid = req.user.id;
+    let foodid = v4();
+    const venid = req.vendor.id;
 
     const { name, price, food_image, ready_time, description } = req.body;
 
@@ -179,7 +179,7 @@ export const vendorcreatesFood = async (
     }
     // Create a new food object
     const newFood = (await FoodInstance.create({
-      id: userId,
+      id: foodid,
       order_count: 0,
       name,
       date_created: new Date(),
@@ -208,13 +208,13 @@ export const vendorcreatesFood = async (
 };
 
 // Vendor Get All Food
-export const vendorgetsAllFood = async (
+export const vendorgetsAllHisFood = async (
   req: JwtPayload,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const vendorId = req.user.id;
+    const vendorId = req.vendor.id;
     const allFood = await FoodInstance.findAll({
       where: {
         vendorId: vendorId,
@@ -232,7 +232,7 @@ export const vendorgetsAllFood = async (
 // Vendor Get Single Food
 export const vendorGetsSingleFood = async (req: JwtPayload, res: Response) => {
   try {
-    const vendorId = req.user.id;
+    const vendorId = req.vendor.id;
     const foodid = req.query.foodid;
     const food = (await FoodInstance.findOne({
       where: { id: foodid, vendorId: vendorId },
@@ -249,94 +249,7 @@ export const vendorGetsSingleFood = async (req: JwtPayload, res: Response) => {
     });
   }
 };
-
- export const getPopularVendors = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) => {
-    try {
-      let page = 1;
-      if (req.query.page) {
-        page = parseInt(req.query.page as string);
-        if (Number.isNaN(page)) {
-          return res.status(400).json({
-            message: "Invalid page number",
-          });
-        }
-      }
-  
-      const pageSize = 10;
-      const offset = (page - 1) * pageSize;
-  
-      const vendors: any = await VendorInstance.findAll({});
-      const totalPages = Math.ceil(vendors.length / pageSize);
-  
-      if (page > totalPages) {
-        page = totalPages;
-      }
-  
-      const totalVendors = [];
-      for (let key of vendors) {
-        if (key.orders >= 10) {
-          totalVendors.push(key);
-        }
-      }
-      const popularVendors = vendors.slice(offset, page * pageSize);
-  
-      return res.status(200).json({
-        popularVendors,
-        currentPage: page,
-        totalPages,
-      });
-    } catch (err) {
-      console.error("Error executing getUsers:", err);
-      return res.status(500).json({
-        Error: "Internal Server Error",
-      });
-    }
-  };
-
-  export const getAllVendors = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) => {
-    try {
-      let page = 1;
-      if (req.query.page) {
-        page = parseInt(req.query.page as string);
-        if (Number.isNaN(page)) {
-          return res.status(400).json({
-            message: "Invalid page number",
-          });
-        }
-      }  
-  
-      const pageSize = 10;
-      const offset = (page - 1) * pageSize;
-  
-      const vendors = await VendorInstance.findAll();
-      const totalPages = Math.ceil(vendors.length / pageSize);
-  
-      if (page > totalPages) {
-        page = totalPages;
-      }
-      const allVendors = vendors.slice(offset, page * pageSize);
-  
-      return res.status(200).json({
-        allVendors,
-        currentPage: page,
-        totalPages,
-      });
-    } catch (err) {
-      console.error("Error executing getUsers:", err);
-      return res.status(500).json({
-        Error: "Internal Server Error",
-      });
-    }
-  };
-
+ 
   export const vendorLogin = async(req:Request, res:Response)=>{
     try{
       const {
@@ -355,7 +268,7 @@ export const vendorGetsSingleFood = async (req: JwtPayload, res: Response) => {
 const user = await VendorInstance.findOne({where:{email:email}}) as unknown as VendorAttributes
 if(!user) return res.status(404).json({msg: `User not found`})
 
-const validatePassword = await bcrypt.compare(user.password, password);
+const validatePassword = await bcrypt.compare(password, user.password);
 
 const token = await GenerateSignature({ email: user.email, id: user.id });
       res.cookie("token", token);
@@ -384,8 +297,8 @@ return res.status(404).json({msg: `Wrong Password`})
                 message: `Password Mismatch`
             })
         }
-        const userId = req.vendor.id;
-        const vendor:any = await VendorInstance.findOne({where: { id: userId },
+        const vendorid = req.vendor.id;
+        const vendor:any = await VendorInstance.findOne({where: { id: vendorid },
         }) as unknown as VendorAttributes;
           const token = await GenerateSignature({
             id: vendor.id,
@@ -399,7 +312,7 @@ return res.status(404).json({msg: `Wrong Password`})
              password:hash,
              salt: new_salt 
             },
-            { where: { id: userId } }
+            { where: { id: vendorid } }
           ) as unknown as VendorAttributes;
        
           if (updatedPassword) {

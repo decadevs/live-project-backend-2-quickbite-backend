@@ -1,6 +1,7 @@
 import {Request, Response, NextFunction } from "express";
 import jwt,{ JwtPayload } from "jsonwebtoken";
 import { APP_SECRET } from "../config";
+import { VendorInstance, VendorAttributes } from "../models/vendorModel";
 
 
 
@@ -56,6 +57,32 @@ export const auth = async(req:JwtPayload, res:Response, next:NextFunction) => {
     }
     const decoded = jwt.verify(pin, `${APP_SECRET}`)
         req.user = decoded
+    return next()
+}catch(err){console.log(err)}
+}
+
+export const vendorauth = async(req:JwtPayload, res:Response, next:NextFunction) => {
+    try{
+    const authorization = req.headers.authorization;
+    if(authorization===undefined){
+          return res.status(401).send({
+            status: "There is an Error",
+            message: "Ensure that you are logged in"
+          })
+    }
+    const pin = authorization.split(" ")[1];
+    if(!pin || pin ===""){
+        return res.status(401).send({
+            status: "Error",
+            message: "The pin can't be used"
+        })
+    }
+    const decoded:any = jwt.verify(pin, `${APP_SECRET}`)
+    const vendor = await VendorInstance.findOne({where: { id: decoded.id },
+    }) as unknown as VendorAttributes;
+    if(vendor.role !== 'vendor')
+    return res.status(400).json({msg: `You are not a vendor`})
+    req.vendor = decoded
     return next()
 }catch(err){console.log(err)}
 }
