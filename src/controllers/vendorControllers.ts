@@ -289,9 +289,9 @@ return res.status(404).json({msg: `Wrong Password`})
    }
   }
 
-  export const vendorChangeLoginPassword = async (req:JwtPayload, res:Response) => {
+  export const vendorChangePassword = async (req:JwtPayload, res:Response) => {
     try{
-        const {new_password, confirm_password} = req.body;
+        const {old_password, new_password, confirm_password} = req.body;
         if(new_password !== confirm_password){
             return res.status(400).json({
                 message: `Password Mismatch`
@@ -300,6 +300,11 @@ return res.status(404).json({msg: `Wrong Password`})
         const vendorid = req.vendor.id;
         const vendor:any = await VendorInstance.findOne({where: { id: vendorid },
         }) as unknown as VendorAttributes;
+
+        const confirm = await bcrypt.compare(old_password, vendor.password)
+        if(!confirm) return res.status(400).json({
+          msg: `Wrong Password`
+        })
           const token = await GenerateSignature({
             id: vendor.id,
             email: vendor.email
@@ -317,7 +322,7 @@ return res.status(404).json({msg: `Wrong Password`})
        
           if (updatedPassword) {
             return res.status(200).json({
-              message: "You have successfully updated your profile",
+              message: "You have successfully changes your password",
               id:vendor.id,
               email: vendor.email,
               role: vendor.role
@@ -338,8 +343,7 @@ return res.status(404).json({msg: `Wrong Password`})
 export const vendorEditProfile = async (req: JwtPayload, res: Response) => {
   try {
     const vend = req.vendor.id;
-    const { email, restaurant_name, name_of_owner, address, phone_no, cover_image } = req.body;
-
+    const { email, restaurant_name, name_of_owner, address, phone_no } = req.body;
   //   const validateResult = updateSchema.validate(req.body, option);
   //   if (validateResult.error) {
   //     return res.status(400).json({
@@ -354,7 +358,7 @@ export const vendorEditProfile = async (req: JwtPayload, res: Response) => {
     // Create an object to store the fields that need to be updated
     const updatedFields: Partial<VendorAttributes> = {};
 
-    // Check if email is provided and not empty, then add it to the updatedFields object
+    // // Check if email is provided and not empty, then add it to the updatedFields object
     if (email !== '') {
       updatedFields.email = email;
     }
@@ -374,10 +378,6 @@ export const vendorEditProfile = async (req: JwtPayload, res: Response) => {
 
     if (phone_no !== '') {
       updatedFields.phone_no = phone_no;
-    }
-
-    if (cover_image !== '') {
-      updatedFields.cover_image = cover_image;
     }
 
     // Perform the update operation with the fields from updatedFields
@@ -407,7 +407,7 @@ export const vendorEditProfile = async (req: JwtPayload, res: Response) => {
   }
 }
 
-export const getSingleVendor = async (req:JwtPayload, res:Response)=>{
+export const vendorGetsProfile = async (req:JwtPayload, res:Response)=>{
   try{
       const userId = req.vendor.id;
       const vendor = await VendorInstance.findOne({where: {id:userId}})
