@@ -78,6 +78,7 @@ export const vendorauth = async(req:JwtPayload, res:Response, next:NextFunction)
         })
     }
     const decoded:any = jwt.verify(pin, `${APP_SECRET}`)
+    console.log(decoded)
     const vendor = await VendorInstance.findOne({where: { id: decoded.id },
     }) as unknown as VendorAttributes;
     if(vendor.role !== 'vendor')
