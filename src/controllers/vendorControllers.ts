@@ -113,6 +113,8 @@ export const registerVendor = async (
       password: hash,
       address,
       phone_no,
+      earnings: 0,
+      revenue: 0,
       isAvailable: true,
       role: "vendor",
       salt,
@@ -146,7 +148,6 @@ export const registerVendor = async (
     });
   }
 };
-
 
 // Vendor Creates Food
 export const vendorcreatesFood = async (
@@ -287,7 +288,7 @@ return res.status(404).json({msg: `Wrong Password`})
         msg: `Internal Server Error`
       })
    }
-  }
+};
 
   export const vendorChangePassword = async (req:JwtPayload, res:Response) => {
     try{
@@ -338,7 +339,7 @@ return res.status(404).json({msg: `Wrong Password`})
             message: `Internal Server Error`
         })
     }
-}
+};
 
 export const vendorEditProfile = async (req: JwtPayload, res: Response) => {
   try {
@@ -405,7 +406,7 @@ export const vendorEditProfile = async (req: JwtPayload, res: Response) => {
     console.log(err.message);
     return res.status(500).json({ message: `Internal Server Error` });
   }
-}
+};
 
 export const vendorGetsProfile = async (req:JwtPayload, res:Response)=>{
   try{
@@ -417,4 +418,4 @@ export const vendorGetsProfile = async (req:JwtPayload, res:Response)=>{
       console.log(err.message)
       return res.status(500).json({msg: `Internal Server Error`})
   }
-}
+};
