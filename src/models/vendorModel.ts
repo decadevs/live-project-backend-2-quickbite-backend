@@ -13,6 +13,8 @@ export interface VendorAttributes {
     address?: string;
     phone_no?: string;
     isAvailable: boolean;
+    earnings: number;
+    revenue: number;
     role: string;
     salt: string;
     cover_image?: string;
@@ -37,6 +39,14 @@ VendorInstance.init({
     },
     restaurant_name: {
         type: DataTypes.STRING,
+        allowNull: true,
+    },
+    earnings: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+    },
+    revenue: {
+        type: DataTypes.INTEGER,
         allowNull: true,
     },
     name_of_owner: {
