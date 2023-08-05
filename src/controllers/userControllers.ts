@@ -1,5 +1,5 @@
-import { FoodInstance } from "../models/foodModel";
-import { VendorInstance } from "../models/vendorModel";
+import { FoodAttributes, FoodInstance } from "../models/foodModel";
+import { VendorAttributes, VendorInstance } from "../models/vendorModel";
 import express, {Request, Response, NextFunction } from 'express';
 import bcrypt from 'bcrypt';
 import {v4} from 'uuid';
@@ -10,6 +10,7 @@ import { UserAttributes } from '../models/userModel';
 import { validateUserSchema } from '../utils/validators';
 import { hashPassword, GenerateOTP, GenerateSignature, GenerateSalt } from '../utils/helpers';
 import { mailUserOtp } from '../utils/emailFunctions';
+import { OrderAttributes, OrderInstance } from "../models/orderModel";
 
 
 
@@ -353,4 +354,109 @@ export const getAllVendors = async (
     }
   };
 
+export const userMakeOrder = async (req:Request, res:Response, next:NextFunction) => {
+    try {
+        const {vendorId, foodId, quantity} = req.body
 
+        // const user = await UserInstance.findOne({where: {id: userId}}) as unknown as UserAttributes
+
+        const vendor = await VendorInstance.findOne({where: {id: vendorId}}) as unknown as VendorAttributes
+
+        const food = await FoodInstance.findOne({where: {id: foodId}}) as unknown as FoodAttributes
+
+        // if(!user){
+        //     return res.status(400).json({
+        //         status: "error",
+        //         method: req.method,
+        //         message: "user not found"
+        //     })
+        // }
+        if(!vendor){
+            return res.status(400).json({
+                status: "error",
+                method: req.method,
+                message: "vendor not found"
+            })
+        }
+        if(!food){
+            return res.status(400).json({
+                status: "error",
+                method: req.method,
+                message: "food not found"
+            })
+        }
+
+        const amount = food.price * quantity
+        const orderId = v4()
+       
+            const order = await OrderInstance.create({
+                id: orderId,
+                foodid: food.id,
+                food_name: food.name,
+                quantity: quantity,
+                amount: amount,
+                status: "pending",
+                userId: "",
+                vendorId: vendor.id,
+                isPaid: false,
+            }) as unknown as OrderAttributes
+
+        return res.status(200).json({
+            status: "success",
+            method: req.method,
+            message: "order created successfuly",
+            order
+        })
+
+        
+        
+
+    }catch(err) {
+        console.error("Error making order:", err);
+        return res.status(500).json({
+            Error: "Internal Server Error",
+        });
+    }
+}
+
+export const userChangeOrderStatus = async (req: Request, res: Response) => {
+    try {
+        const { orderId, status } = req.body;
+
+        const order = await OrderInstance.findOne({ where: { id: orderId } }) as unknown as OrderAttributes;
+
+        if (!order) {
+            return res.status(400).json({
+                status: "error",
+                method: req.method,
+                message: "order not found"
+            });
+        }
+
+        if (order.status === "Ready") {
+            const updatedOrder = await OrderInstance.update(
+                { status: "Fulfilled" },
+                { where: { id: orderId } }
+            ) as unknown as OrderAttributes;
+
+            return res.status(200).json({
+                status: "success",
+                method: req.method,
+                message: "order status updated successfully",
+                updatedOrder
+            });
+        } else {
+            return res.status(400).json({
+                status: "error",
+                method: req.method,
+                message: "order status cannot be changed to Fulfilled",
+            });
+        }
+
+    } catch (err) {
+        console.error("Error updating order:", err);
+        return res.status(500).json({
+            Error: "Internal Server Error",
+        });
+    }
+}
