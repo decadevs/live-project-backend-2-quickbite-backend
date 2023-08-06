@@ -460,3 +460,40 @@ export const userChangeOrderStatus = async (req: Request, res: Response) => {
         });
     }
 }
+
+export const userEditProfile = async (req: Request, res: Response) => {
+    try {
+        const { userId, email, firstname, lastname, address, phone_no } = req.body;
+
+        const user = await UserInstance.findOne({ where: { id: userId } }) as unknown as UserAttributes;
+
+        if (!user) {
+            return res.status(400).json({
+                status: "error",
+                method: req.method,
+                message: "user not found"
+            });
+        }
+
+        const updatedUser = await UserInstance.update({
+            email: email,
+            firstname: firstname,
+            lastname: lastname,
+            address: address,
+            phone_no: phone_no
+        }, { where: { id: userId } }) as unknown as UserAttributes;
+
+        return res.status(200).json({
+            status: "success",
+            method: req.method,
+            message: "user updated successfully",
+            updatedUser
+        });
+
+    } catch (error) {
+        console.error("Error updating user:", error);
+        return res.status(500).json({
+            Error: "Internal Server Error",
+        });
+    }
+}
