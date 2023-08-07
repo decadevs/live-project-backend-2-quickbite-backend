@@ -1,5 +1,5 @@
 import { userGetsAllFoods,userGetsAllFoodByAVendor, userGetPopularFoods, getAllVendors,
-registerUser, userLogIn, verifyOtp, userGetPopularVendors, reSendOtp} from '../controllers/userControllers'
+registerUser, userLogIn, verifyOtp, userGetPopularVendors, reSendOtp, userGetFulfilledOrders, userGetsReadyOrders, userGetsPendingOrders} from '../controllers/userControllers'
 import {Router} from 'express';
 import {auth} from '../middleware/authorizations'
 
@@ -14,5 +14,9 @@ router.get('/allvendorfoods', auth, userGetsAllFoodByAVendor)
 router.get('/popularfoods', auth, userGetPopularFoods)
 router.get('/getVendors', auth, getAllVendors)
 router.get('/getPopularVendors', auth, userGetPopularVendors)
+// edited this line 
+router.get('/getFulfilledOrders', auth, userGetFulfilledOrders)
+router.get('/readyOrders', auth , userGetsReadyOrders)
+router.get('/pendingOrders', auth , userGetsPendingOrders)
 
 export default router;

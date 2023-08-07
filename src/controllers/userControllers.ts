@@ -11,6 +11,12 @@ import { validateUserSchema } from '../utils/validators';
 import { hashPassword, GenerateOTP, GenerateSignature, GenerateSalt } from '../utils/helpers';
 import { mailUserOtp } from '../utils/emailFunctions';
 
+// newly added imports
+import {OrderInstance} from '../models/orderModel'
+import { isNamespaceExportDeclaration } from "typescript";
+
+
+
 
 
 export const userGetsAllFoods=async(req:JwtPayload,res:Response)=>{
@@ -353,4 +359,81 @@ export const getAllVendors = async (
     }
   };
 
+  // newly added functions 
+  export const userGetFulfilledOrders = async (req: JwtPayload, res: Response) => {
+
+    try{
+        const userId = req.user.id;
+
+
+        const fulfilledOrders = await OrderInstance.findAll({
+            where: {
+                userId: userId,
+                status: 'fulfilled',
+            }
+        });
+
+        if(fulfilledOrders.length === 0 ){
+            return res.status(404).json({msg:'No fulfilled orders found for the user'})
+        }
+        return res.status(200).json({
+            msg: 'Fulfilled Orders fetched',
+            fulfilledOrders,
+        });
+
+    }catch(error:any){
+        console.log(error.message);
+        return res.status(500).json({msg: 'Internal server error '});
+
+    }
+
+  };
+
+  export const userGetsReadyOrders = async(req:JwtPayload, res: Response) => {
+    try{
+        const userId = req.user.id;
+        const readyOrders = await OrderInstance.findAll({
+            where: {
+                userId: userId,
+                status: 'ready'
+            }
+        })
+       if(!readyOrders || readyOrders.length === 0){
+        return res.status(404).json({msg:'No ready orders found for this user'});
+       }
+       return res.status(200).json({
+        msg:'Ready orders fetched',
+        readyOrders,
+       });
+        
+    }catch(error: any){
+        console.log(error.message);
+        return res.status(500).json({msg:'Internal server error'})
+    }
+  }
+
+  export const userGetsPendingOrders = async(req:JwtPayload, res:Response) => {
+    try{
+        const userId = req.user.id
+        const pendingOrders = await OrderInstance.findAll({
+            where: {
+                userId: userId,
+                status: 'pending',
+            }
+        });
+        if(!pendingOrders || pendingOrders.length === 0){
+            return res.status(404).json({msg:'No pending orders found for this user'})
+        }
+        return res.status(200).json({
+            msg:'Pending orders fetched',
+            pendingOrders,
+        });
+    }catch(error:any){
+        console.log(error.message);
+        return res.status(500).json({msg:'Internal server error'});
+    }
+  }
+
+
+ 
 
