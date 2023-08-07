@@ -39,8 +39,8 @@ app.use('/user', userRoutes)
 
 
 
-app.listen(PORT, ()=>{
-    console.log(`server running on port ${PORT}`)
+app.listen(process.env.DEV_PORT, ()=>{
+    console.log(`server running on port ${process.env.DEV_PORT}`)
 })
 
 export default app;

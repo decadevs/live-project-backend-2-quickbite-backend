@@ -1,6 +1,7 @@
 // models/Order.ts
 import { DataTypes, Model } from 'sequelize';
 import { db } from '../config';
+import { UserInstance } from './userModel';
 
 
 export interface OrderAttributes {
@@ -15,7 +16,11 @@ export interface OrderAttributes {
     isPaid: boolean
 }
 
-export class OrderInstance extends Model<OrderAttributes> {}
+export class OrderInstance extends Model<OrderAttributes> {
+  public static associate(models:{User: typeof UserInstance}): void{
+    OrderInstance.belongsTo(models.User,{foreignKey:'userId', as:'User'})
+  }
+}
 
 OrderInstance.init(
   {
@@ -46,6 +51,11 @@ OrderInstance.init(
     },
     userId: {
       type: DataTypes.STRING,
+      references:{
+        model: UserInstance,
+        key:'id',
+
+      },
     },
     vendorId: {
         type: DataTypes.STRING,
@@ -61,3 +71,7 @@ OrderInstance.init(
     tableName: 'Orders',
   }
 );
+
+export default OrderInstance;
+
+
