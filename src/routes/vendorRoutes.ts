@@ -10,14 +10,17 @@ const router = express.Router();
 
 router.post("/verifyvendor", verifyVendor);
 router.post("/registervendor", authForVerifiedVendor, upload.single("cover_image"), registerVendor);
-router.post("/createfood", upload.single("food_image"), vendorcreatesFood);
+router.post("/createfood", vendorauth, upload.single("food_image"), vendorcreatesFood);
 router.get("/getallfood",vendorauth, vendorgetsAllHisFood);
 router.get("/getsinglefood", vendorGetsSingleFood);
 router.post('/login', vendorLogin)
 router.post('/loginpasswordchange', vendorauth, vendorChangePassword)
 router.patch('/editprofile', vendorauth, upload.single("cover_image"), vendorEditProfile)
+router.put('/editfood/:id',  updateFood  )
+
 router.get('/getsingleprofile', vendorauth, vendorGetsProfile)
-router.delete('/deletefood', DeleteSingleFood)
+router.delete('/:id', DeleteSingleFood)
+router.delete('/', DeleteAllFood)
 
 
 export default router;

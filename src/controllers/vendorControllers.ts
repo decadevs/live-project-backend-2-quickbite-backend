@@ -161,11 +161,18 @@ export const vendorcreatesFood = async (
   next: NextFunction
 ) => {
   try {
-    let foodid = v4();
-    const venid = req.vendor.id;
+    const vendorId = req.vendor.id;
 
+    console.log("vender id", vendorId)
+    
     const { name, price, food_image, ready_time, description } = req.body;
 
+     console.log( name, price,food_image,ready_time, description )
+
+      const venid = vendorId
+    console.log("params id  ",req.params.id)
+    
+ 
     const error = validateFoodSchema.safeParse(req.body);
     if (error.success === false) {
       res.status(400).send({
@@ -183,6 +190,7 @@ export const vendorcreatesFood = async (
         message: `Food exists`,
       });
     }
+    let foodid = v4();
     // Create a new food object
     const newFood = (await FoodInstance.create({
       id: foodid,
@@ -259,6 +267,8 @@ export const vendorGetsSingleFood = async (req: JwtPayload, res: Response) => {
 export const vendorLogin = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
+
+    console.log(email, password )
 
     const validateVendor = vendorLoginSchema.safeParse({ email, password });
     if (validateVendor.success === false) {
@@ -438,7 +448,7 @@ export const vendorGetsProfile = async (req: JwtPayload, res: Response) => {
 export const updateFood = async (req: JwtPayload, res: Response) => {
  // console.log( JwtPayload)
   try {
-   const {id} = req.body;
+   const id = req.vendor.id;
     const { name, price, ready_time, description } = req.body;
     const [rowsUpdated, updatedFoods] = await FoodInstance.update(
       {
@@ -459,13 +469,13 @@ export const updateFood = async (req: JwtPayload, res: Response) => {
       });
     }
 
-    const getOneFood = updatedFoods[0];
+    const updatedFood = updatedFoods[0];
 
     return res.status(200).send({
       Status: "success",
       Method: req.method,
       Message: `Food with id ${id} updated successfully`,
-      getOneFood,
+      updatedFood,
     });
   } catch (error) {
     console.log(error);
@@ -476,13 +486,13 @@ export const updateFood = async (req: JwtPayload, res: Response) => {
 
 export const DeleteSingleFood = async (req: JwtPayload, res: Response) => {
   try {
-    const {id} = req.body;
+    const id = req.params.id;
     console.log(id)
     const food = await FoodInstance.findOne({ where: { id: id } });
     if (!food)
       return res
         .status(404)
-        .json({ message: `vendor with id ${req.food.id} not found` });
+        .json({ message: `vendor with id ${req.params.id} not found` });
     await FoodInstance.destroy({ where: { id: id } });
     return res.status(200).json({ msg: `Vendor was deleted successfully` });
   } catch (err: any) {
@@ -492,13 +502,12 @@ export const DeleteSingleFood = async (req: JwtPayload, res: Response) => {
 };
 
 export const DeleteAllFood = async (req: JwtPayload, res: Response) => {
-  console.log("JwtPayload")
-  try {
-   
-    const food = await FoodInstance.destroy();
-    if(food){
+ 
+  try {   
+    const food = await FoodInstance.destroy({truncate:true});
+    
       return res.status(200).json({ msg: `All vendors deleted successfully` });
-    }
+  
    
   } catch (err: any) {
     console.log(err.message);
