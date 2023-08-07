@@ -70,6 +70,7 @@ export const vendorauth = async(req:JwtPayload, res:Response, next:NextFunction)
             message: "Ensure that you are logged in"
           })
     }
+    console.log(authorization)
     const pin = authorization.split(" ")[1];
     if(!pin || pin ===""){
         return res.status(401).send({
