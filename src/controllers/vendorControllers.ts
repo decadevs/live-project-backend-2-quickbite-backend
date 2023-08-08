@@ -14,6 +14,7 @@ import { GMAIL_USER } from "../config";
 import { zodSchema, validateFoodSchema } from "../utils/validators";
 import { FoodAttributes, FoodInstance } from "../models/foodModel";
 import { vendorLoginSchema } from "../utils/validators";
+import { OrderAttributes, OrderInstance } from "../models/orderModel";
 import bcrypt from "bcrypt";
 
 export const verifyVendor = async (
@@ -89,6 +90,7 @@ export const registerVendor = async (
       restaurant_name,
       address,
       cover_image,
+    
     } = req.body;
 
     const verifyIfVendorExistByEmail = (await VendorInstance.findOne({
@@ -118,6 +120,8 @@ export const registerVendor = async (
       password: hash,
       address,
       phone_no,
+      earnings: 0,
+      revenue: 0,
       isAvailable: true,
       role: "vendor",
       salt,
@@ -355,7 +359,7 @@ export const vendorChangePassword = async (req: JwtPayload, res: Response) => {
       message: `Internal Server Error`,
     });
   }
-};
+}
 
 export const vendorEditProfile = async (req: JwtPayload, res: Response) => {
   try {
@@ -486,7 +490,7 @@ export const updateFood = async (req: JwtPayload, res: Response) => {
 
 export const DeleteSingleFood = async (req: JwtPayload, res: Response) => {
   try {
-    const id = req.params.id;
+    const id = req.vendor.id;
     console.log(id)
     const food = await FoodInstance.findOne({ where: { id: id } });
     if (!food)
@@ -515,4 +519,17 @@ export const DeleteAllFood = async (req: JwtPayload, res: Response) => {
   }
 };
 
-export const changeStatus = (req: JwtPayload, res: Response) => {};
+export const changeStatus = async(req: JwtPayload, res: Response) => {
+  try {
+    const id = req.vendor.id;
+    const orderStatus = await OrderInstance.findOne({where:{id:id}})as unknown as OrderAttributes;
+    if(!orderStatus){
+      console.log(`Order with id ${id} not found.`)
+      return;
+    }
+    orderStatus.status = 'Ready';
+   
+  } catch (error) {
+    
+  }
+};

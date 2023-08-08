@@ -9,7 +9,7 @@ export interface FoodAttributes {
     date_created: Date;
     date_updated: Date;
     vendorId: string;
-    price: string;
+    price: number;
     food_image: string;
     ready_time: string;
     isAvailable: boolean;
@@ -48,7 +48,7 @@ date_updated: {
         type: DataTypes.STRING,
     },
     price: {
-        type: DataTypes.STRING,
+        type: DataTypes.INTEGER,
         allowNull: false,
         validate: {
             notNull: {
