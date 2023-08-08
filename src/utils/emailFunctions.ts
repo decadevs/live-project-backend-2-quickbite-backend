@@ -1,7 +1,7 @@
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
-import {GMAIL_USER,
-    GMAIL_PASSWORD} from '../config'
+// import {GMAIL_USER,
+//     GMAIL_PASSWORD} from '../config'
 
 dotenv.config()
 

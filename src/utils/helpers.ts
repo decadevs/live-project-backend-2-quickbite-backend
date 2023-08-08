@@ -56,3 +56,9 @@ export const GenerateOTP = () => {
     expiry.setTime(new Date().getTime() + (30*60*1000))
     return {otp, expiry}
 }
+
+
+export const calRevenue = (revenue: number)=>{
+    const result = 0.8 * revenue
+    return result;
+}
