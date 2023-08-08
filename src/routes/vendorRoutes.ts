@@ -4,7 +4,7 @@ import { upload } from "../middleware/upload";
 import {vendorcreatesFood,vendorLogin, vendorGetsProfile,
     vendorChangePassword, vendorEditProfile,
     vendorgetsAllHisFood, vendorGetsSingleFood,
-    verifyVendor, registerVendor } from "../controllers/vendorControllers";
+    verifyVendor, registerVendor, vendorGetsOrderCount, vendorTotalRevenue, vendorAvailability, singleOrderDetails } from "../controllers/vendorControllers";
 
 const router = express.Router();
 
@@ -17,6 +17,9 @@ router.post('/login', vendorLogin)
 router.post('/passwordchange', vendorauth, vendorChangePassword)
 router.patch('/editprofile', vendorauth, upload.single("cover_image"), vendorEditProfile)
 router.get('/getsingleprofile', vendorauth, vendorGetsProfile)
-
+router.get('/vendororders', vendorauth, vendorGetsOrderCount)
+router.get('/revenuevendor', vendorauth, vendorTotalRevenue)
+router.put('/availablevendor', vendorauth, vendorAvailability)
+router.get('/singleorder', vendorauth, singleOrderDetails)
 
 export default router;

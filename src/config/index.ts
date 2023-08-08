@@ -6,7 +6,6 @@ export const {DB_HOST, GMAIL_USER, GMAIL_PASSWORD,
     DB_NAME, DB_USERNAME, DB_PASSWORD, APP_SECRET } = process.env
 
 const DB_PORT = process.env.DB_PORT as unknown as number
-
 export const db = new Sequelize(
   DB_NAME!,//name of database
   DB_USERNAME!,//name of username
