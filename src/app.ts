@@ -37,7 +37,8 @@ db.sync({}).then( ()=>{
 app.use("/vendor", vendorRoutes)
 app.use('/user', userRoutes)
 
-
+const {DB_PORT} = process.env
+console.log(DB_PORT);
 
 app.listen(PORT, ()=>{
     console.log(`server running on port ${PORT}`)
