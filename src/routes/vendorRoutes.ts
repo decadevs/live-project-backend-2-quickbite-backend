@@ -3,8 +3,8 @@ import { authForVerifiedVendor, auth, vendorauth } from "../middleware/authoriza
 import { upload } from "../middleware/upload";
 import {vendorcreatesFood,vendorLogin, vendorGetsProfile,
     vendorChangePassword, vendorEditProfile,
-    vendorgetsAllHisFood, vendorGetsSingleFood,
-    verifyVendor, registerVendor, getVendorRevenue, editVendorCoverImage, editFoodImage } from "../controllers/vendorControllers";
+    vendorgetsAllHisFood, vendorGetsSingleFood, 
+    verifyVendor, registerVendor, vendorGetsOrderCount, vendorTotalRevenue, vendorAvailability, singleOrderDetails,getVendorIncome, editVendorCoverImage, editFoodImage } from "../controllers/vendorControllers";
 
 const router = express.Router();
 
@@ -17,8 +17,12 @@ router.post('/login', vendorLogin)
 router.post('/passwordchange', vendorauth, vendorChangePassword)
 router.patch('/editprofile', vendorauth, upload.single("cover_image"), vendorEditProfile)
 router.get('/getsingleprofile', vendorauth, vendorGetsProfile)
-router.get('/getvendorincome', vendorauth, getVendorRevenue)
+router.get('/getvendorincome', vendorauth, getVendorIncome)
 router.put("/updatefoodimage", vendorauth, upload.single("food_image"), editFoodImage);
 router.put("/updatevendorimage", vendorauth, upload.single("cover_image"), editVendorCoverImage);
+router.get('/vendororders', vendorauth, vendorGetsOrderCount)
+router.get('/revenuevendor', vendorauth, vendorTotalRevenue)
+router.put('/availablevendor', vendorauth, vendorAvailability)
+router.get('/singleorder', vendorauth, singleOrderDetails)
 
 export default router;

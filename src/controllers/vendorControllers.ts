@@ -10,6 +10,7 @@ import { zodSchema, validateFoodSchema } from "../utils/validators";
 import { FoodAttributes, FoodInstance } from "../models/foodModel";
 import { vendorLoginSchema } from '../utils/validators';
 import bcrypt from 'bcrypt';
+import { OrderAttributes, OrderInstance } from "../models/orderModel";
 
 export const verifyVendor = async (
   req: Request,
@@ -52,8 +53,8 @@ export const verifyVendor = async (
       company_Name: `${verifiedRegNo.findCompany.company_name}`,
       registration_Number: `${verifiedRegNo.findCompany.reg_no}`,
     });
-  } catch (err: any) {
-    console.log(err.message);
+  } catch (err) {
+    console.log(err);
     return res.status(500).json({
       message: `Internal server error`,
     });
@@ -349,6 +350,12 @@ export const vendorEditProfile = async (req: JwtPayload, res: Response) => {
   try {
     const vend = req.vendor.id;
     const { email, restaurant_name, name_of_owner, address, phone_no } = req.body;
+    //   const validateResult = updateSchema.validate(req.body, option);
+    //   if (validateResult.error) {
+    //     return res.status(400).json({
+    //       Error: validateResult.error.details[0].message,
+    //     });
+    //   }
 
     const findVendor = await VendorInstance.findOne({ where: { id: vend } }) as unknown as VendorAttributes;
 
@@ -420,7 +427,7 @@ export const vendorGetsProfile = async (req: JwtPayload, res: Response) => {
 
 
 
-export const getVendorRevenue = async (req: JwtPayload, res: Response) => {
+export const getVendorIncome = async (req: JwtPayload, res: Response) => {
 
  try {
   const vendorId = req.vendor.id;
@@ -435,13 +442,13 @@ export const getVendorRevenue = async (req: JwtPayload, res: Response) => {
 
   const revenue: number = vendor.revenue
 
-  const vendorRevenue: number = calRevenue(revenue)
+  const vendorIncome: number = calRevenue(revenue)
 
   return res.status(200).json({
     status: "success",
     method: req.method,
     message: "vendor's revenue",
-    data: vendorRevenue
+    data: vendorIncome
   })
  } catch (error) {
   return res.status(404).json({
@@ -519,4 +526,108 @@ export const editFoodImage = async (req: JwtPayload, res: Response) => {
     data: food
   })
 
+}
+export const vendorGetsOrderCount = async (req: JwtPayload, res: Response) => {
+  try {
+    const vendorId = req.vendor.id;
+    const vendorOrders:any = await OrderInstance.findOne({ where: { id: vendorId } }) as unknown as OrderAttributes
+
+    if (!vendorOrders) {
+      return res.status(404).json({
+        message: `Vendor order not found`
+      })
+    } else if (vendorOrders) {
+
+      const orderCount = vendorOrders.length
+
+      return res.status(200).json({ message: `Vendor's order fetched` })
+      orderCount
+    }
+
+  } catch (err: any) {
+    console.log(err.message)
+    return res.status(500).json({ message: `Internal server error` })
+  }
+
+}
+
+export const vendorTotalRevenue = async (req: JwtPayload, res: Response) => {
+  try {
+    const vendorId = req.vendor.id;
+    const vendorRevenue = await VendorInstance.findOne({ where: { id: vendorId } })
+    if (!vendorRevenue) {
+      return res.status(404).json({
+        message: `Vendor's total revenue cannot be fetched`
+      })
+    } else if (vendorRevenue) {
+
+      const totalRevenue = vendorRevenue.revenue
+      return res.status(200).json({
+        message: `Vendor's total revenue fetched successfully`,
+        totalRevenue
+
+      })
+    }
+  }
+  catch (err: any) {
+    console.log(err)
+    return res.status(500).json({
+      message: `Internal server error`
+    })
+  }
+}
+
+
+export const vendorAvailability = async (req: JwtPayload, res: Response) => {
+  try {
+    const vendorId = req.vendor.id;
+    const availableVendor = await VendorInstance.findOne({ where: { id: vendorId } })
+    if (!availableVendor) {
+      return res.status(404).json({
+        message: `Vendor not found`
+      })
+      
+    } else if (availableVendor) {
+      try {
+        const newAvailability = !availableVendor.isAvailable;
+        // const updateVendor= await VendorInstance.update({isAvailable: true }, {where: {id: vendorId}})
+
+        await VendorInstance.update({ isAvailable: newAvailability }, { where: { id: vendorId } });
+
+        return res.status(200).json({
+          message: `Vendor availability status updated`
+        })
+      }
+      catch (err: any) {
+        console.log(err); return res.status(500).json({ message: `Internal server error` })
+      }
+    }
+  }
+  catch (err: any) {
+    console.log(err)
+    return res.status(500).json({
+      message: `Internal server error`
+    })
+  }
+
+}
+
+export const singleOrderDetails = async (req: JwtPayload, res: Response) => {
+  try {
+    const orderId =  req.query.id;
+    const orderDetails = await OrderInstance.findOne({ where: { id: orderId } }) as unknown as OrderAttributes;
+    if (!orderDetails) {
+      return res.status(404).json({
+        message: `Order not found`
+      })
+    } else if (orderDetails) {
+      return res.status(200).json({
+        message: `Order details fetched`,
+        order: orderDetails
+      })
+    }
+  }
+  catch (err: any) {
+    console.log(err); return res.status(500).json({ message: `Internal server error` })
+  }
 }
