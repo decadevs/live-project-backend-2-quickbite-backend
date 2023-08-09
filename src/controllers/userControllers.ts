@@ -497,7 +497,7 @@ export const userMakeOrder = async (req:Request, res:Response, next:NextFunction
     }
 }
 
-export const userChangeOrderStatus = async (req: Request, res: Response) => {
+export const userChangeOrderStatus = async (req: JwtPayload, res: Response) => {
     try {
         const { orderId, status } = req.body;
 
@@ -539,9 +539,10 @@ export const userChangeOrderStatus = async (req: Request, res: Response) => {
     }
 }
 
-export const userEditProfile = async (req: Request, res: Response) => {
+export const userEditProfile = async (req: JwtPayload, res: Response) => {
     try {
-        const { userId, email, firstname, lastname, address, phone_no } = req.body;
+        const userId = req.user.id;
+        const { email, firstname, lastname, address, phone_no } = req.body;
 
         const user = await UserInstance.findOne({ where: { id: userId } }) as unknown as UserAttributes;
 
@@ -553,13 +554,44 @@ export const userEditProfile = async (req: Request, res: Response) => {
             });
         }
 
-        const updatedUser = await UserInstance.update({
-            email: email,
-            firstname: firstname,
-            lastname: lastname,
-            address: address,
-            phone_no: phone_no
-        }, { where: { id: userId } }) as unknown as UserAttributes;
+        // Create an Object to store the fields that need to be updated
+        const updatedUserFields: Partial<UserAttributes> = {};
+
+        // Check if the fields are empty and add them to the object
+        if (email !== '') {
+            updatedUserFields.email = email;
+        }
+
+        if (firstname !== '') {
+            updatedUserFields.firstname = firstname;
+        }
+
+        if (lastname !== '') {
+            updatedUserFields.lastname = lastname;
+        }
+
+        if (address !== '') {
+            updatedUserFields.address = address;
+        }
+
+        if (phone_no !== '') {
+            updatedUserFields.phone_no = phone_no;
+        }
+
+        // Update the User
+
+        const updatedUser:any = await UserInstance.update(updatedUserFields, {
+            where: { id: userId },
+        }) as unknown as UserAttributes;
+        
+
+        // const updatedUser = await UserInstance.update({
+        //     email: email,
+        //     firstname: firstname,
+        //     lastname: lastname,
+        //     address: address,
+        //     phone_no: phone_no
+        // }, { where: { id: userId } }) as unknown as UserAttributes;
 
         return res.status(200).json({
             status: "success",
