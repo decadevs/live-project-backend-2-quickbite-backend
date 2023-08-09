@@ -69,6 +69,7 @@ export const registerVendor = async (
   next: NextFunction
 ) => {
   try {
+   
     let newUser = req.body;
   
     const error = zodSchema.safeParse(newUser);
