@@ -22,7 +22,11 @@ export interface VendorAttributes {
     orders: number
 }
 
-export class VendorInstance extends Model<VendorAttributes> {}
+export class VendorInstance extends Model<VendorAttributes> {
+  orders: any;
+  revenue: any;
+  isAvailable: any;
+}
 
 VendorInstance.init({
     id: {

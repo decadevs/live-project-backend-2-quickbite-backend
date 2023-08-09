@@ -12,7 +12,8 @@ import { hashPassword, GenerateOTP, GenerateSignature, GenerateSalt } from '../u
 import { mailUserOtp } from '../utils/emailFunctions';
 import { OrderAttributes, OrderInstance } from "../models/orderModel";
 
-
+// newly added imports
+import { isNamespaceExportDeclaration } from "typescript";
 
 export const userGetsAllFoods=async(req:JwtPayload,res:Response)=>{
     try{
@@ -354,6 +355,83 @@ export const getAllVendors = async (
     }
   };
 
+  // newly added functions 
+  export const userGetFulfilledOrders = async (req: JwtPayload, res: Response) => {
+
+    try{
+        const userId = req.user.id;
+
+
+        const fulfilledOrders = await OrderInstance.findAll({
+            where: {
+                userId: userId,
+                status: 'fulfilled',
+            }
+        });
+
+        if(fulfilledOrders.length === 0 ){
+            return res.status(404).json({msg:'No fulfilled orders found for the user'})
+        }
+        return res.status(200).json({
+            msg: 'Fulfilled Orders fetched',
+            fulfilledOrders,
+        });
+
+    }catch(error:any){
+        console.log(error.message);
+        return res.status(500).json({msg: 'Internal server error '});
+
+    }
+
+  };
+
+  export const userGetsReadyOrders = async(req:JwtPayload, res: Response) => {
+    try{
+        const userId = req.user.id;
+        const readyOrders = await OrderInstance.findAll({
+            where: {
+                userId: userId,
+                status: 'ready'
+            }
+        })
+       if(!readyOrders || readyOrders.length === 0){
+        return res.status(404).json({msg:'No ready orders found for this user'});
+       }
+       return res.status(200).json({
+        msg:'Ready orders fetched',
+        readyOrders,
+       });
+        
+    }catch(error: any){
+        console.log(error.message);
+        return res.status(500).json({msg:'Internal server error'})
+    }
+  }
+
+  export const userGetsPendingOrders = async(req:JwtPayload, res:Response) => {
+    try{
+        const userId = req.user.id
+        const pendingOrders = await OrderInstance.findAll({
+            where: {
+                userId: userId,
+                status: 'pending',
+            }
+        });
+        if(!pendingOrders || pendingOrders.length === 0){
+            return res.status(404).json({msg:'No pending orders found for this user'})
+        }
+        return res.status(200).json({
+            msg:'Pending orders fetched',
+            pendingOrders,
+        });
+    }catch(error:any){
+        console.log(error.message);
+        return res.status(500).json({msg:'Internal server error'});
+    }
+  }
+
+
+ 
 export const userMakeOrder = async (req:Request, res:Response, next:NextFunction) => {
     try {
         const {vendorId, foodId, quantity} = req.body
@@ -419,7 +497,7 @@ export const userMakeOrder = async (req:Request, res:Response, next:NextFunction
     }
 }
 
-export const userChangeOrderStatus = async (req: Request, res: Response) => {
+export const userChangeOrderStatus = async (req: JwtPayload, res: Response) => {
     try {
         const { orderId, status } = req.body;
 
@@ -461,9 +539,10 @@ export const userChangeOrderStatus = async (req: Request, res: Response) => {
     }
 }
 
-export const userEditProfile = async (req: Request, res: Response) => {
+export const userEditProfile = async (req: JwtPayload, res: Response) => {
     try {
-        const { userId, email, firstname, lastname, address, phone_no } = req.body;
+        const userId = req.user.id;
+        const { email, firstname, lastname, address, phone_no } = req.body;
 
         const user = await UserInstance.findOne({ where: { id: userId } }) as unknown as UserAttributes;
 
@@ -475,13 +554,44 @@ export const userEditProfile = async (req: Request, res: Response) => {
             });
         }
 
-        const updatedUser = await UserInstance.update({
-            email: email,
-            firstname: firstname,
-            lastname: lastname,
-            address: address,
-            phone_no: phone_no
-        }, { where: { id: userId } }) as unknown as UserAttributes;
+        // Create an Object to store the fields that need to be updated
+        const updatedUserFields: Partial<UserAttributes> = {};
+
+        // Check if the fields are empty and add them to the object
+        if (email !== '') {
+            updatedUserFields.email = email;
+        }
+
+        if (firstname !== '') {
+            updatedUserFields.firstname = firstname;
+        }
+
+        if (lastname !== '') {
+            updatedUserFields.lastname = lastname;
+        }
+
+        if (address !== '') {
+            updatedUserFields.address = address;
+        }
+
+        if (phone_no !== '') {
+            updatedUserFields.phone_no = phone_no;
+        }
+
+        // Update the User
+
+        const updatedUser:any = await UserInstance.update(updatedUserFields, {
+            where: { id: userId },
+        }) as unknown as UserAttributes;
+        
+
+        // const updatedUser = await UserInstance.update({
+        //     email: email,
+        //     firstname: firstname,
+        //     lastname: lastname,
+        //     address: address,
+        //     phone_no: phone_no
+        // }, { where: { id: userId } }) as unknown as UserAttributes;
 
         return res.status(200).json({
             status: "success",
