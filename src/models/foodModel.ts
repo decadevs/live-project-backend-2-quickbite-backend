@@ -14,6 +14,7 @@ export interface FoodAttributes {
     ready_time: string;
     isAvailable: boolean;
     rating: number;
+   
     description: string;
 }
 
@@ -29,6 +30,8 @@ FoodInstance.init({
         type: DataTypes.INTEGER,
         allowNull: true,
     },
+ 
+   
     name: {
         type: DataTypes.STRING,
         allowNull: false,
