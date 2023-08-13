@@ -298,7 +298,7 @@ export const userLogIn = async (req:Request, res:Response, next:NextFunction) =>
                 status: "success",
                 method: req.method,
                 message: "Login Successful",
-                email: user.email,
+                userData: user,
                 token
             }) 
 
