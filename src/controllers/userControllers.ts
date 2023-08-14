@@ -607,3 +607,31 @@ export const userEditProfile = async (req: JwtPayload, res: Response) => {
         });
     }
 }
+
+export const userGetsNewFoods = async (req: JwtPayload, res: Response) => {
+    try {
+        const oneMonthAgo = new Date();
+        oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+        
+        const recentFoods = await FoodInstance.findAll({
+            where: {
+                date_created: {
+                    [Op.gte]: oneMonthAgo,
+                }
+            },
+            order: [['createdAt', 'DESC']]
+        });
+
+        if (recentFoods.length === 0) {
+            return res.status(404).json({ msg: `No recent foods found` });
+        }
+        
+        return res.status(200).json({
+            msg: `Recent foods fetched`,
+            recentFoods
+        });
+    } catch (error: any) {
+        console.log(error.message);
+        return res.status(500).json({ msg: `Internal server error` });
+    }
+}
