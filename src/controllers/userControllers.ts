@@ -11,6 +11,7 @@ import { validateUserSchema } from '../utils/validators';
 import { hashPassword, GenerateOTP, GenerateSignature, GenerateSalt } from '../utils/helpers';
 import { mailUserOtp } from '../utils/emailFunctions';
 import { OrderAttributes, OrderInstance } from "../models/orderModel";
+import { Op } from 'sequelize';
 
 // newly added imports
 import { isNamespaceExportDeclaration } from "typescript";
