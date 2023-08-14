@@ -4,6 +4,7 @@ import { db } from '../config';
 
 
 export interface OrderAttributes {
+    length: any;
     id: string;
     foodid: string;
     food_name: string;
