@@ -99,7 +99,7 @@ export const registerVendor = async (
 
     if (verifyIfVendorExistByEmail || verifyIfVendorExistByRestaurantName) {
       return res.status(400).json({
-        Message: `Profile is already in use`,
+        message: `Profile is already in use`,
       });
     }
 
@@ -284,7 +284,7 @@ export const vendorLogin = async (req: Request, res: Response) => {
       });
     }
     const user = await VendorInstance.findOne({ where: { email: email } }) as unknown as VendorAttributes
-    if (!user) return res.status(404).json({ msg: `User not found` })
+    if (!user) return res.status(404).json({ message: `Vendor not found` })
 
     const validatePassword = await bcrypt.compare(password, user.password);
 
@@ -296,14 +296,15 @@ export const vendorLogin = async (req: Request, res: Response) => {
         status: 'Success',
         method: req.method,
         message: 'Login successful',
-        token
+        token,
+        data: user
       })
     }
-    return res.status(404).json({ msg: `Wrong Password` })
+    return res.status(404).json({ message: `Wrong Password` })
   } catch (error) {
     console.log(error);
     return res.status(500).json({
-      msg: `Internal Server Error`
+      message: `Internal Server Error`
     })
   }
 };
@@ -324,7 +325,7 @@ export const vendorChangePassword = async (req: JwtPayload, res: Response) => {
 
     const confirm = await bcrypt.compare(oldPassword, vendor.password)
     if (!confirm) return res.status(400).json({
-      msg: `Wrong Password`
+      message: `Wrong Password`
     })
     const token = await GenerateSignature({
       id: vendor.id,

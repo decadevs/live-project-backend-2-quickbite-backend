@@ -430,8 +430,6 @@ export const getAllVendors = async (
         return res.status(500).json({msg:'Internal server error'});
     }
   }
-
-
  
 export const userMakeOrder = async (req:Request, res:Response, next:NextFunction) => {
     try {
