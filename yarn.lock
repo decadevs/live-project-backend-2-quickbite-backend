@@ -331,13 +331,13 @@ __metadata:
   linkType: hard
 
 "agentkeepalive@npm:^4.2.1":
-  version: 4.4.0
-  resolution: "agentkeepalive@npm:4.4.0"
+  version: 4.3.0
+  resolution: "agentkeepalive@npm:4.3.0"
   dependencies:
     debug: "npm:^4.1.0"
     depd: "npm:^2.0.0"
     humanize-ms: "npm:^1.2.1"
-  checksum: 7ad1457ad6115ae8e9d7884da7a1729bd507266ba8072ec53767b33e43ab9a9058c7de6e38f2729414a46f290b97a090caa1129f85cfe1dc7b4d4f278a698e8e
+  checksum: b3cce4e2faf86c01bad23b471a67f4aa2e6001b833bc2f63a3d5a8b2a671636f8aac7d215e6f8243ce1c07c7a5d8d5fa90ab894ff0d9f0c3e05c2cda801103fb
   languageName: node
   linkType: hard
 

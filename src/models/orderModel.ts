@@ -17,6 +17,9 @@ export interface OrderAttributes {
 }
 
 export class OrderInstance extends Model<OrderAttributes> {
+  markAsReady() {
+    throw new Error("Method not implemented.");
+  }
   public static associate(models:{User: typeof UserInstance}): void{
     OrderInstance.belongsTo(models.User,{foreignKey:'userId', as:'User'})
   }
