@@ -78,16 +78,18 @@ export const userGetPopularFoods = async (req: Request, res: Response) => {
     }
 };
 
-export const userGetPopularVendors = async (req: JwtPayload, res: Response) => {
+export const userGetPopularVendors = async (req: Request, res: Response) => {
     try {
         let totalVendors = []
+        let vendorsCheck = []
         const vendors:any = await VendorInstance.findAll({})
-        if(vendors.length===0) return res.status(400).json({msg: `No vendors found`})
     for (let key of vendors) {
+      vendorsCheck.push(key)
       if (key.orders >= 10) {
         totalVendors.push(key);
       }
     }
+    if(vendorsCheck.length===0) return res.status(400).json({msg: `No vendors found`})
     if(totalVendors.length === 0) return res.status(400).json({msg: `No popular vendors found`})
     return res.status(200).json({
         msg: `Popular Vendors fetched`,
@@ -626,7 +628,7 @@ export const userGetsNewFoods = async (req: JwtPayload, res: Response) => {
         }
         
         return res.status(200).json({
-            msg: `Recent foods fetched`,
+            messasge: `Recent foods fetched`,
             recentFoods
         });
     } catch (error: any) {

@@ -42,6 +42,7 @@ export const verifyVendor = async (
 
     const token = await GenerateSignature({
       regNo: verifiedRegNo.findCompany.reg_no,
+      company_name: `${verifiedRegNo.findCompany.company_name}`
     });
 
     res.cookie("token", token);
@@ -78,7 +79,8 @@ export const registerVendor = async (
 
     const id = v4();
     const userId = req.regNo;
-    const registeredBusiness = await axiosVerifyVendor(userId);
+    const compName = req.company_name
+    // const registeredBusiness = await axiosVerifyVendor(userId);
     
     const {
       email,
@@ -97,9 +99,14 @@ export const registerVendor = async (
       where: { restaurant_name: restaurant_name },
     })) as unknown as VendorAttributes;
 
-    if (verifyIfVendorExistByEmail || verifyIfVendorExistByRestaurantName) {
+    if (verifyIfVendorExistByEmail) {
       return res.status(400).json({
-        message: `Profile is already in use`,
+        message: `${email} is already in use`,
+      });
+    }
+    if(verifyIfVendorExistByRestaurantName){
+      return res.status(400).json({
+        message: `${restaurant_name} is already in use`,
       });
     }
 
@@ -113,7 +120,7 @@ export const registerVendor = async (
       email,
       restaurant_name,
       name_of_owner,
-      company_name: registeredBusiness.findCompany.company_name,
+      company_name: compName,
       password: hash,
       address,
       phone_no,
