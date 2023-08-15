@@ -14,7 +14,6 @@ export interface FoodAttributes {
     ready_time: string;
     isAvailable: boolean;
     rating: number;
-   
     description: string;
 }
 

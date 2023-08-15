@@ -1,5 +1,6 @@
 import { userGetsAllFoods,userGetsAllFoodByAVendor, userGetPopularFoods, getAllVendors,
-registerUser, userLogIn, verifyOtp, userGetPopularVendors, reSendOtp, userGetFulfilledOrders, userGetsReadyOrders, userGetsPendingOrders, userMakeOrder, userChangeOrderStatus, userEditProfile} from '../controllers/userControllers'
+registerUser, userLogIn, verifyOtp, userGetsNewFoods, 
+userGetPopularVendors, reSendOtp, userGetFulfilledOrders, userGetsReadyOrders, userGetsPendingOrders, userMakeOrder, userChangeOrderStatus, userEditProfile} from '../controllers/userControllers'
 import {Router} from 'express';
 import {auth} from '../middleware/authorizations'
 
@@ -12,12 +13,13 @@ router.post('/makeorder',auth, userMakeOrder);
 router.post('/changestatus', auth, userChangeOrderStatus);
 router.get('/resend', auth, reSendOtp);
 router.get("/allfoods", auth, userGetsAllFoods)
-router.get('/allvendorfoods', auth, userGetsAllFoodByAVendor)
-router.get('/popularfoods', auth, userGetPopularFoods)
+router.get('/allvendorfoods', userGetsAllFoodByAVendor)
+router.get('/popularfoods', userGetPopularFoods)
 router.get('/getVendors', auth, getAllVendors)
-router.get('/getPopularVendors', auth, userGetPopularVendors)
+router.get('/getPopularVendors', userGetPopularVendors)
 router.get('/getFulfilledOrders', auth, userGetFulfilledOrders)
 router.get('/readyOrders', auth , userGetsReadyOrders)
+router.get('/getNewFoods', userGetsNewFoods)
 router.get('/pendingOrders', auth , userGetsPendingOrders)
 router.put('/editprofile', auth, userEditProfile);
 export default router;

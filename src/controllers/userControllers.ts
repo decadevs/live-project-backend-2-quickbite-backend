@@ -11,6 +11,7 @@ import { validateUserSchema } from '../utils/validators';
 import { hashPassword, GenerateOTP, GenerateSignature, GenerateSalt } from '../utils/helpers';
 import { mailUserOtp } from '../utils/emailFunctions';
 import { OrderAttributes, OrderInstance } from "../models/orderModel";
+import { Op } from 'sequelize';
 
 // newly added imports
 import { isNamespaceExportDeclaration } from "typescript";
@@ -77,16 +78,18 @@ export const userGetPopularFoods = async (req: Request, res: Response) => {
     }
 };
 
-export const userGetPopularVendors = async (req: JwtPayload, res: Response) => {
+export const userGetPopularVendors = async (req: Request, res: Response) => {
     try {
         let totalVendors = []
+        let vendorsCheck = []
         const vendors:any = await VendorInstance.findAll({})
-        if(vendors.length===0) return res.status(400).json({msg: `No vendors found`})
     for (let key of vendors) {
+      vendorsCheck.push(key)
       if (key.orders >= 10) {
         totalVendors.push(key);
       }
     }
+    if(vendorsCheck.length===0) return res.status(400).json({msg: `No vendors found`})
     if(totalVendors.length === 0) return res.status(400).json({msg: `No popular vendors found`})
     return res.status(200).json({
         msg: `Popular Vendors fetched`,
@@ -429,8 +432,6 @@ export const getAllVendors = async (
         return res.status(500).json({msg:'Internal server error'});
     }
   }
-
-
  
 export const userMakeOrder = async (req:JwtPayload, res:Response, next:NextFunction) => {
     try {
@@ -568,5 +569,33 @@ export const userEditProfile = async (req: Request, res: Response) => {
         return res.status(500).json({
             Error: "Internal Server Error",
         });
+    }
+}
+
+export const userGetsNewFoods = async (req: JwtPayload, res: Response) => {
+    try {
+        const oneMonthAgo = new Date();
+        oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+        
+        const recentFoods = await FoodInstance.findAll({
+            where: {
+                date_created: {
+                    [Op.gte]: oneMonthAgo,
+                }
+            },
+            order: [['createdAt', 'DESC']]
+        });
+
+        if (recentFoods.length === 0) {
+            return res.status(404).json({ msg: `No recent foods found` });
+        }
+        
+        return res.status(200).json({
+            messasge: `Recent foods fetched`,
+            recentFoods
+        });
+    } catch (error: any) {
+        console.log(error.message);
+        return res.status(500).json({ msg: `Internal server error` });
     }
 }
