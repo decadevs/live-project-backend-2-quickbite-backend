@@ -34,14 +34,16 @@ db.sync({}).then( ()=>{
     console.log(err);
 })
 
+
+
 app.use("/vendor", vendorRoutes)
 app.use('/user', userRoutes)
 
-const {DB_PORT} = process.env
+// const {DB_PORT} = process.env
 // console.log(DB_PORT);
 
-app.listen(process.env.DEV_PORT, ()=>{
-    console.log(`server running on port ${process.env.DEV_PORT}`)
+app.listen(PORT, ()=>{
+    console.log(`server running on port ${PORT}`)
 })
 
 export default app;
