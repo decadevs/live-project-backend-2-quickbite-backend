@@ -52,8 +52,8 @@ export const verifyVendor = async (
       registration_Number: `${verifiedRegNo.findCompany.reg_no}`,
       token
     });
-  } catch (err) {
-    console.log(err);
+  } catch (err:any) {
+    console.log(err.message);
     return res.status(500).json({
       message: `Internal server error`,
     });

@@ -378,7 +378,7 @@ export const getAllVendors = async (
         Error: "Internal Server Error",
       });
     }
-  };
+};
 
   // newly added functions 
   export const userGetFulfilledOrders = async (req: JwtPayload, res: Response) => {
@@ -408,7 +408,7 @@ export const getAllVendors = async (
 
     }
 
-  };
+};
 
   export const userGetsReadyOrders = async(req:JwtPayload, res: Response) => {
     try{
@@ -431,7 +431,7 @@ export const getAllVendors = async (
         console.log(error.message);
         return res.status(500).json({msg:'Internal server error'})
     }
-  }
+}
 
   export const userGetsPendingOrders = async(req:JwtPayload, res:Response) => {
     try{
@@ -453,7 +453,7 @@ export const getAllVendors = async (
         console.log(error.message);
         return res.status(500).json({msg:'Internal server error'});
     }
-  }
+}
  
 export const userMakeOrder = async (req:Request, res:Response, next:NextFunction) => {
     try {
