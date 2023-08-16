@@ -30,6 +30,7 @@ export const authForVerifiedVendor = async(req:JwtPayload, res:Response, next:Ne
     })
 
     req.regNo = decoded.regNo;
+    req.company_name = decoded.company_name
    
     return next()
 } catch(err){

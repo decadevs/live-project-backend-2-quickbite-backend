@@ -58,23 +58,42 @@ export const userGetsAllFoodByAVendor = async (req: JwtPayload, res: Response) =
 };
 
 export const userGetPopularFoods = async (req: Request, res: Response) => {
+    // try {
+    //     const top10Foods = await FoodInstance.findAll({
+    //         order: [['order_count', 'DESC']], 
+    //         limit: 10, 
+    //     });
+
+    //     // if (!top10Foods || top10Foods.length === 0) {
+    //     //     return res.status(404).json({ msg: `Top 10 foods not found` });
+    //     // }
+
+    //     return res.status(200).json({
+    //         msg: `Top 10 foods fetched`,
+    //         top10Foods,
+    //     });
+    // } catch (error: any) {
+    //     console.log(error.message);
+    //     return res.status(500).json({ msg: `Internal server error` });
     try {
-        const top10Foods = await FoodInstance.findAll({
-            order: [['order_count', 'DESC']], 
-            limit: 10, 
-        });
-
-        // if (!top10Foods || top10Foods.length === 0) {
-        //     return res.status(404).json({ msg: `Top 10 foods not found` });
-        // }
-
-        return res.status(200).json({
-            msg: `Top 10 foods fetched`,
-            top10Foods,
-        });
+        let totalFoods = []
+        let foodCheck = []
+        const foods:any = await FoodInstance.findAll({})
+    for (let key of foods) {
+      foodCheck.push(key)
+      if (key.order_count >= 10) {
+        totalFoods.push(key);
+      }
+    }
+    if(foodCheck.length===0) return res.status(400).json({message: `No Foods found`})
+    if(totalFoods.length === 0) return res.status(400).json({message: `No popular Foods found`})
+    return res.status(200).json({
+        message: `Popular Foods fetched`,
+        data: totalFoods
+    })
     } catch (error: any) {
         console.log(error.message);
-        return res.status(500).json({ msg: `Internal server error` });
+        return res.status(500).json({ message: `Internal server error` });
     }
 };
 
@@ -89,15 +108,15 @@ export const userGetPopularVendors = async (req: Request, res: Response) => {
         totalVendors.push(key);
       }
     }
-    if(vendorsCheck.length===0) return res.status(400).json({msg: `No vendors found`})
-    if(totalVendors.length === 0) return res.status(400).json({msg: `No popular vendors found`})
+    if(vendorsCheck.length===0) return res.status(400).json({message: `No vendors found`})
+    if(totalVendors.length === 0) return res.status(400).json({message: `No popular vendors found`})
     return res.status(200).json({
-        msg: `Popular Vendors fetched`,
-        totalVendors
+        message: `Popular Vendors fetched`,
+        data: totalVendors
     })
     } catch (error: any) {
         console.log(error.message);
-        return res.status(500).json({ msg: `Internal server error` });
+        return res.status(500).json({ message: `Internal server error` });
     }
 
 }
@@ -632,7 +651,7 @@ export const userGetsNewFoods = async (req: JwtPayload, res: Response) => {
         
         return res.status(200).json({
             messasge: `Recent foods fetched`,
-            recentFoods
+            data: recentFoods
         });
     } catch (error: any) {
         console.log(error.message);
