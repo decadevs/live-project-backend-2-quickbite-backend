@@ -46,7 +46,7 @@ export const userGetsAllFoodByAVendor = async (req: JwtPayload, res: Response) =
         }
         if(allFood){
             return res.status(200).json({
-                msg: `All foods fetched for this vendor`,
+                message: `All foods fetched for this vendor`,
                 allFood
             });
         }
@@ -201,11 +201,11 @@ export const registerUser = async (req:Request, res:Response, next:NextFunction)
 
 export const verifyOtp = async(req:JwtPayload, res:Response, next:NextFunction)=>{
     try {
-        const otp = req.query.otp
+        const otp = req.body.otp
         const userId = req.user.id
         console.log(req.user)
 
-        const user:JwtPayload = await UserInstance.findOne({where:{id:userId}}) as unknown as UserAttributes
+        const user:any = await UserInstance.findOne({where:{id:userId}}) as unknown as UserAttributes
     
         if(user && user.otp === Number(otp) && user.otp_expiry > new Date()){
             const newOtp = 108
@@ -214,7 +214,7 @@ export const verifyOtp = async(req:JwtPayload, res:Response, next:NextFunction)=
                 otp:newOtp
             }, {where: {id:userId}})
             return res.status(200).json({
-                msg: `Email verified, proceed to login`
+                message: `Email verified, proceed to login`
             })
         }
         if(user.otp !== Number(otp)){
@@ -231,8 +231,11 @@ export const verifyOtp = async(req:JwtPayload, res:Response, next:NextFunction)=
                 message: "OTP expired",
             })  
         }
-    } catch (error) {
-        console.log(error)    
+    } catch (error:any) {
+        console.log(error.message)  
+        return res.status(500).json({
+            message: `Internal Server Error`
+        })  
     }
 }
 
@@ -309,11 +312,11 @@ export const userLogIn = async (req:Request, res:Response, next:NextFunction) =>
 
         }
         
-    } catch (error) {
+    } catch (error:any) {
         return res.status(400).json({
             status: "error",
             method: req.method,
-            message: error,
+            message: error.message,
         })   
     }
 }

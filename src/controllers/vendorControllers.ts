@@ -304,10 +304,10 @@ export const vendorLogin = async (req: Request, res: Response) => {
         method: req.method,
         message: 'Login successful',
         token,
-        data: user
+        user
       })
     }
-    return res.status(404).json({ message: `Wrong Password` })
+    return res.status(404).json({message: `Wrong Password` })
   } catch (error) {
     console.log(error);
     return res.status(500).json({
