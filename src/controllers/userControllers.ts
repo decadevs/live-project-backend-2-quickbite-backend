@@ -21,12 +21,12 @@ export const userGetsAllFoods=async(req:JwtPayload,res:Response)=>{
     const allFood = await FoodInstance.findAll({});
     if(!allFood) return res.status(404).json({msg: `Foods not found`})
     return res.status(200).json({
-      msg: `All foods fetched`,
+      message: `All foods fetched`,
       allFood
     })
     }catch(error:any){
         console.log(error.message);
-        return res.status(500).json({msg: `Internal server error`})
+        return res.status(500).json({message: `Internal server error`})
     }
 }
 
@@ -36,13 +36,13 @@ export const userGetsAllFoodByAVendor = async (req: JwtPayload, res: Response) =
         const vendorId = req.query.vendorId;
 
         if (!vendorId) {
-            return res.status(400).json({ msg: "vendorId is required in query parameters" });
+            return res.status(400).json({ message: "vendorId is required in query parameters" });
         }
 
         const allFood = await FoodInstance.findAll({ where: { vendorId } });
 
         if (allFood.length === 0) {
-            return res.status(404).json({ msg: `Foods not found for the given vendorId` });
+            return res.status(404).json({ message: `Foods not found for the given vendorId` });
         }
         if(allFood){
             return res.status(200).json({
@@ -53,7 +53,7 @@ export const userGetsAllFoodByAVendor = async (req: JwtPayload, res: Response) =
         
     } catch (error: any) {
         console.log(error.message);
-        return res.status(500).json({ msg: `Internal server error` });
+        return res.status(500).json({ message: `Internal server error` });
     }
 };
 
@@ -65,16 +65,16 @@ export const userGetPopularFoods = async (req: Request, res: Response) => {
     //     });
 
     //     // if (!top10Foods || top10Foods.length === 0) {
-    //     //     return res.status(404).json({ msg: `Top 10 foods not found` });
+    //     //     return res.status(404).json({ message: `Top 10 foods not found` });
     //     // }
 
     //     return res.status(200).json({
-    //         msg: `Top 10 foods fetched`,
+    //         message: `Top 10 foods fetched`,
     //         top10Foods,
     //     });
     // } catch (error: any) {
     //     console.log(error.message);
-    //     return res.status(500).json({ msg: `Internal server error` });
+    //     return res.status(500).json({ message: `Internal server error` });
     try {
         let totalFoods = []
         let foodCheck = []
@@ -133,7 +133,7 @@ export const registerUser = async (req:Request, res:Response, next:NextFunction)
         const userId = v4()
 
         //validate input
-        if(password !== confirm_password) return res.status(400).json({msg: `Password Mismatch`})
+        if(password !== confirm_password) return res.status(400).json({message: `Password Mismatch`})
 
         const error = validateUserSchema.safeParse(req.body);
         if(error.success === false){
@@ -202,6 +202,7 @@ export const registerUser = async (req:Request, res:Response, next:NextFunction)
             method: req.method,
             message: "user created successfuly",
             token,
+            email: user.email,
             user
             
         })
@@ -276,9 +277,9 @@ export const reSendOtp = async(req:JwtPayload, res:Response, next:NextFunction)=
             to: user.email,
             OTP:otp
          })
-        return res.status(200).json({ status:"success", msg: `OTP regenerated`})
+        return res.status(200).json({ status:"success", message: `OTP regenerated`})
     }
-    return res.status(400).json({msg: `Otp generation unsuccesful`})
+    return res.status(400).json({message: `Otp generation unsuccesful`})
    } catch (error:any) {
     return res.status(400).json({
         status: "error",
@@ -305,7 +306,11 @@ export const userLogIn = async (req:Request, res:Response, next:NextFunction) =>
                 message: "user not found"
             })
         }
-    
+        // if(user.verified===false)
+        // return res.status(400).json({
+        //     status: 'error',
+        //     message: "please verify your account"
+        // })
         //validate user password
         if(user){
             const validated =  await bcrypt.compare(password, user.password)
@@ -395,16 +400,16 @@ export const getAllVendors = async (
         });
 
         if(fulfilledOrders.length === 0 ){
-            return res.status(404).json({msg:'No fulfilled orders found for the user'})
+            return res.status(404).json({message:'No fulfilled orders found for the user'})
         }
         return res.status(200).json({
-            msg: 'Fulfilled Orders fetched',
+            message: 'Fulfilled Orders fetched',
             fulfilledOrders,
         });
 
     }catch(error:any){
         console.log(error.message);
-        return res.status(500).json({msg: 'Internal server error '});
+        return res.status(500).json({message: 'Internal server error '});
 
     }
 
@@ -420,16 +425,16 @@ export const getAllVendors = async (
             }
         })
        if(!readyOrders || readyOrders.length === 0){
-        return res.status(404).json({msg:'No ready orders found for this user'});
+        return res.status(404).json({message:'No ready orders found for this user'});
        }
        return res.status(200).json({
-        msg:'Ready orders fetched',
+        message:'Ready orders fetched',
         readyOrders,
        });
         
     }catch(error: any){
         console.log(error.message);
-        return res.status(500).json({msg:'Internal server error'})
+        return res.status(500).json({message:'Internal server error'})
     }
 }
 
