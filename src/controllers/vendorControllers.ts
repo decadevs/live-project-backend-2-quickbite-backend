@@ -201,7 +201,7 @@ export const vendorcreatesFood = async (
     // Create a new food object
     const newFood = (await FoodInstance.create({
       id: foodid,
-      order_count: 30,
+      order_count: 0,
       name,
       date_created: new Date(),
       date_updated: new Date(),
