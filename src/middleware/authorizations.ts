@@ -58,7 +58,13 @@ export const auth = async(req:JwtPayload, res:Response, next:NextFunction) => {
     const decoded = jwt.verify(pin, `${APP_SECRET}`)
         req.user = decoded
     return next()
-}catch(err){console.log(err)}
+}catch(err){
+    console.log("ERROR:",err)
+    return res.status(401).send({
+        status: "Error",
+        message: err
+      })
+}
 }
 
 export const vendorauth = async(req:JwtPayload, res:Response, next:NextFunction) => {
@@ -70,6 +76,7 @@ export const vendorauth = async(req:JwtPayload, res:Response, next:NextFunction)
             message: "Ensure that you are logged in"
           })
     }
+    console.log(authorization)
     const pin = authorization.split(" ")[1];
     if(!pin || pin ===""){
         return res.status(401).send({
@@ -78,12 +85,13 @@ export const vendorauth = async(req:JwtPayload, res:Response, next:NextFunction)
         })
     }
     const decoded:any = jwt.verify(pin, `${APP_SECRET}`)
-    console.log(decoded)
+    console.log("payload data   ",decoded)
     const vendor = await VendorInstance.findOne({where: { id: decoded.id },
     }) as unknown as VendorAttributes;
     if(vendor.role !== 'vendor')
     return res.status(400).json({msg: `You are not a vendor`})
     req.vendor = decoded
+    console.log( " valid vendor id",req.vendor)
     return next()
 }catch(err){console.log(err)}
 }
