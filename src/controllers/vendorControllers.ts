@@ -296,8 +296,6 @@ export const vendorLogin = async (req: Request, res: Response) => {
     const validatePassword = await bcrypt.compare(password, vendor.password);
 
     const token = await GenerateSignature({ email: vendor.email, id: vendor.id });
-    res.cookie("token", token);
-
     if (validatePassword) {
       return res.status(200).json({
         status: 'Success',
