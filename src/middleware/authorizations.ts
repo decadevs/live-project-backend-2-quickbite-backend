@@ -59,7 +59,13 @@ export const auth = async(req:JwtPayload, res:Response, next:NextFunction) => {
     const decoded = jwt.verify(pin, `${APP_SECRET}`)
         req.user = decoded
     return next()
-}catch(err){console.log(err)}
+}catch(err){
+    console.log("ERROR:",err)
+    return res.status(401).send({
+        status: "Error",
+        message: err
+      })
+}
 }
 
 export const vendorauth = async(req:JwtPayload, res:Response, next:NextFunction) => {
