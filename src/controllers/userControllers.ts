@@ -16,13 +16,17 @@ import { Op } from 'sequelize';
 // newly added imports
 import { isNamespaceExportDeclaration } from "typescript";
 
-export const userGetsAllFoods=async(req:JwtPayload,res:Response)=>{
+export const userGetsAllFoods=async(req: Request,res:Response)=>{
     try{
     const allFood = await FoodInstance.findAll({});
-    if(!allFood) return res.status(404).json({msg: `Foods not found`})
+
+    if(!allFood) return res.status(404).json({
+        message: `Foods not found`
+    })
+    
     return res.status(200).json({
-      msg: `All foods fetched`,
-      allFood
+      message: `All foods fetched`,
+      data: allFood
     })
     }catch(error:any){
         console.log(error.message);

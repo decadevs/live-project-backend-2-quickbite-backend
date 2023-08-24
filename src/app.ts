@@ -1,17 +1,13 @@
 import express from "express"
 import dotenv from "dotenv"
-import {db} from "./config"
-import {HttpError} from 'http-errors';
 import config from './config/dbConfig';
 import vendorRoutes from './routes/vendorRoutes';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import logger from 'morgan';
 import path from 'path';
-import userRoutes from './routes/userRoutes'
-import bodyParser from 'body-parser'
-
-
+import userRoutes from './routes/userRoutes';
+import bodyParser from 'body-parser';
 
 const {PORT} = config
 
@@ -28,20 +24,21 @@ app.use(express.urlencoded({extended: false}));
 app.use(cors())
 app.use(express.static(path.join(__dirname, '../public')));
 
-db.sync({}).then( ()=>{
-    console.log("Database is connected");
-}).catch((err:HttpError)=>{
-    console.log(err);
-})
+
+// PG Database Cloud Connection
+
+
+//  Sequelize Database Connection
+
 
 app.use("/vendor", vendorRoutes)
 app.use('/user', userRoutes)
 
-const {DB_PORT} = process.env
+const DB_PORT = PORT
 // console.log(DB_PORT);
 
-app.listen(process.env.DEV_PORT, ()=>{
-    console.log(`server running on port http://localhost:${process.env.DEV_PORT}/`)
+app.listen(DB_PORT || '', ()=>{
+    console.log(`server running on port http://localhost:${DB_PORT}/`)
 })
 
 export default app;

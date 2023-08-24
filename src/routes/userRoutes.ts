@@ -12,7 +12,7 @@ router.post('/verify', auth, verifyOtp);
 router.post('/makeorder',auth, userMakeOrder);
 router.post('/changestatus', auth, userChangeOrderStatus);
 router.get('/resend', auth, reSendOtp);
-router.get("/allfoods", auth, userGetsAllFoods)
+router.get("/allfoods", userGetsAllFoods)
 router.get('/allvendorfoods', userGetsAllFoodByAVendor)
 router.get('/popularfoods', userGetPopularFoods)
 router.get('/getVendors', auth, getAllVendors)
