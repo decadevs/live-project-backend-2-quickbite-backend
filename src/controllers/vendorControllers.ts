@@ -289,12 +289,12 @@ export const vendorLogin = async (req: Request, res: Response) => {
         message: validateVendor.error.issues
       });
     }
-    const user = await VendorInstance.findOne({ where: { email: email } }) as unknown as VendorAttributes
-    if (!user) return res.status(404).json({ message: `Vendor not found` })
+    const vendor = await VendorInstance.findOne({ where: { email: email } }) as unknown as VendorAttributes
+    if (!vendor) return res.status(404).json({ message: `Vendor not found` })
 
-    const validatePassword = await bcrypt.compare(password, user.password);
+    const validatePassword = await bcrypt.compare(password, vendor.password);
 
-    const token = await GenerateSignature({ email: user.email, id: user.id });
+    const token = await GenerateSignature({ email: vendor.email, id: vendor.id });
     res.cookie("token", token);
 
     if (validatePassword) {
@@ -303,7 +303,7 @@ export const vendorLogin = async (req: Request, res: Response) => {
         method: req.method,
         message: 'Login successful',
         token,
-        user
+        vendor
       })
     }
     return res.status(404).json({message: `Wrong Password` })
