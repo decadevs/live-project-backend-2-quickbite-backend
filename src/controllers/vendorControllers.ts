@@ -48,7 +48,7 @@ export const verifyVendor = async (
     res.cookie("token", token);
     return res.status(200).json({
       message: `${verifiedRegNo.findCompany.company_name} is verified`,
-      company_Name: `${verifiedRegNo.findCompany.company_name}`,
+      company_name: `${verifiedRegNo.findCompany.company_name}`,
       registration_Number: `${verifiedRegNo.findCompany.reg_no}`,
     });
   } catch (err:any) {
@@ -169,8 +169,6 @@ export const vendorcreatesFood = async (
   try {
     const vendorId = req.vendor.id;
 
-    
-    
     const { name, price, food_image, ready_time, description } = req.body;
 
      console.log( name, price,food_image,ready_time, description )
@@ -217,8 +215,8 @@ export const vendorcreatesFood = async (
     if (newFood)
       return res
         .status(200)
-        .json({ msg: `Food created successfully`, newFood });
-    return res.status(400).json({ msg: `Unable to create` });
+        .json({ message: `Food created successfully`, newFood });
+    return res.status(400).json({ message: `Unable to create` });
   } catch (err: any) {
     console.log(err.message);
     return res.status(500).json({
@@ -295,8 +293,6 @@ export const vendorLogin = async (req: Request, res: Response) => {
     const validatePassword = await bcrypt.compare(password, vendor.password);
 
     const token = await GenerateSignature({ email: vendor.email, id: vendor.id });
-    res.cookie("token", token);
-
     if (validatePassword) {
       return res.status(200).json({
         status: 'Success',
@@ -545,6 +541,7 @@ export const changeStatus = async(req: JwtPayload, res: Response) => {
 export const vendorGetsOrderCount = async (req: JwtPayload, res: Response) => {
   try {
     const vendorId = req.vendor.id;
+    console.log(vendorId)
     const vendorOrders:any = await OrderInstance.findAll({ where: { vendorId: vendorId } }) as unknown as OrderAttributes
 
     if (!vendorOrders) {
@@ -585,12 +582,10 @@ export const vendorTotalRevenue = async (req: JwtPayload, res: Response) => {
       })
     }
   }
-  catch (err: any) {
-    console.log(err)
-    return res.status(500).json({
-      message: `Internal server error`
-    })
-  }
+  catch (error: any) {
+    console.log(error.message);
+    return res.status(500).json({ message: `Internal server error` });
+}
 }
 
 export const vendorAvailability = async (req: JwtPayload, res: Response) => {
