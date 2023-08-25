@@ -33,7 +33,7 @@ export const GenerateSignatureForVerify = async(regNo:string) => {
 }
 
 export const GenerateSignature = async(payload:any) => {
-    return jwt.sign(payload, APP_SECRET!, {expiresIn:'1h'})
+    return jwt.sign({payload}, `${APP_SECRET}`, {expiresIn:'10h'})
 }
 
 export const verifySignature= async(signature:string) => {
