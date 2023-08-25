@@ -323,7 +323,7 @@ export const userLogIn = async (req:Request, res:Response, next:NextFunction) =>
                 status: "success",
                 method: req.method,
                 message: "Login Successful",
-                userData: user,
+                data: user,
                 token
             }) 
 
@@ -377,6 +377,43 @@ export const getAllVendors = async (
       });
     }
 };
+
+export const getSingleVendors = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+        const vendorId = req.params.id
+  
+      const vendor = await VendorInstance.findAll({where: {id: vendorId}});
+
+      if(!vendor){
+        return res.status(400).send({
+            status: "error",
+            method: req.method,
+            message:"user not found"
+        }) 
+      }
+
+      return res.status(200).json({
+        status: "success",
+        method: req.method,
+        message: "retrievd vendor successfully",
+        vendor  
+      });
+    } catch (err) {
+      console.error("Error executing getUsers:", err);
+      return res.status(500).json({
+        Error: "Internal Server Error",
+      });
+    }
+};
+
+
+
+
+
 
   // newly added functions 
   export const userGetFulfilledOrders = async (req: JwtPayload, res: Response) => {

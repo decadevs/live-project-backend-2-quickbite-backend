@@ -315,6 +315,7 @@ export const vendorLogin = async (req: Request, res: Response) => {
   }
 };
 
+
 export const vendorChangePassword = async (req: JwtPayload, res: Response) => {
   try {
     const { oldPassword, newPassword, confirmPassword } = req.body;
