@@ -111,6 +111,7 @@ export const registerVendor = async (
 
     const salt = await GenerateSalt();
     const password = await passWordGenerator(phone_no);
+    console.log('password is', password)
     const hash = await hashPassword(password, salt);
     const html = emailHtml(email, password);
 
@@ -123,14 +124,14 @@ export const registerVendor = async (
       password: hash,
       address,
       phone_no,
-      earnings: 0,
-      revenue: 0,
+      earnings: 200000,
+      revenue: 500000,
       isAvailable: true,
       role: "vendor",
       salt,
       cover_image: req.file.path,
-      rating: 0,
-      orders: 0,
+      rating: 5,
+      orders: 40,
     })) as unknown as VendorAttributes;
 
     if (!newVendor) {
