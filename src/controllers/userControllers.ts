@@ -30,7 +30,6 @@ export const userGetsAllFoods=async(req:JwtPayload,res:Response)=>{
     }
 }
 
-
 export const userGetsAllFoodByAVendor = async (req: JwtPayload, res: Response) => {
     try {
         const vendorId = req.query.vendorId;
@@ -58,23 +57,7 @@ export const userGetsAllFoodByAVendor = async (req: JwtPayload, res: Response) =
 };
 
 export const userGetPopularFoods = async (req: Request, res: Response) => {
-    // try {
-    //     const top10Foods = await FoodInstance.findAll({
-    //         order: [['order_count', 'DESC']], 
-    //         limit: 10, 
-    //     });
-
-    //     // if (!top10Foods || top10Foods.length === 0) {
-    //     //     return res.status(404).json({ message: `Top 10 foods not found` });
-    //     // }
-
-    //     return res.status(200).json({
-    //         message: `Top 10 foods fetched`,
-    //         top10Foods,
-    //     });
-    // } catch (error: any) {
-    //     console.log(error.message);
-    //     return res.status(500).json({ message: `Internal server error` });
+  
     try {
         let totalFoods = []
         let foodCheck = []
@@ -132,6 +115,8 @@ export const registerUser = async (req:Request, res:Response, next:NextFunction)
             phone_no} = req.body
         const userId = v4()
 
+        console.log(req.body)
+
         //validate input
         if(password !== confirm_password) return res.status(400).json({message: `Password Mismatch`})
 
@@ -140,7 +125,8 @@ export const registerUser = async (req:Request, res:Response, next:NextFunction)
             return   res.status(400).send({
                 status: "error",
                 method: req.method,
-                ERROR: error.error.issues.map((a:any)=> a.message)
+                message: error.error.issues
+                //message: error.error.issues.map((a:any)=> a.message)
             })
         }
 
@@ -202,9 +188,20 @@ export const registerUser = async (req:Request, res:Response, next:NextFunction)
             method: req.method,
             message: "user created successfuly",
             token,
+            userDetails:{
             email: user.email,
-            user
-            
+            firstname: user.firstname,
+            lastname:user.lastname,
+            address: user.address,
+            phone_no: user.phone_no,
+            id: user.id,
+            role: user.role,
+            otp: otp,
+            otp_expiry: expiry,
+            verified: false,
+            createdAt: new Date(),
+            updatedAt: new Date()
+            }   
         })
     } catch (error:any) {
         console.log(error.message)
@@ -223,7 +220,7 @@ export const verifyOtp = async(req:JwtPayload, res:Response, next:NextFunction)=
     try {
         const otp = req.body.otp
         const userId = req.user.id
-        console.log(req.user)
+        console.log("CHECK",req.body)
 
         const user:any = await UserInstance.findOne({where:{id:userId}}) as unknown as UserAttributes
     
@@ -306,12 +303,7 @@ export const userLogIn = async (req:Request, res:Response, next:NextFunction) =>
                 message: "user not found"
             })
         }
-        // if(user.verified===false)
-        // return res.status(400).json({
-        //     status: 'error',
-        //     message: "please verify your account"
-        // })
-        //validate user password
+     
         if(user){
             const validated =  await bcrypt.compare(password, user.password)
            if(!validated){
@@ -330,7 +322,7 @@ export const userLogIn = async (req:Request, res:Response, next:NextFunction) =>
                 status: "success",
                 method: req.method,
                 message: "Login Successful",
-                email: user.email,
+                user,
                 token
             }) 
 
@@ -514,8 +506,8 @@ export const userMakeOrder = async (req:Request, res:Response, next:NextFunction
             order
         })
 
-        
-        
+
+
 
     }catch(err) {
         console.error("Error making order:", err);
@@ -613,14 +605,6 @@ export const userEditProfile = async (req: JwtPayload, res: Response) => {
         }) as unknown as UserAttributes;
         
 
-        // const updatedUser = await UserInstance.update({
-        //     email: email,
-        //     firstname: firstname,
-        //     lastname: lastname,
-        //     address: address,
-        //     phone_no: phone_no
-        // }, { where: { id: userId } }) as unknown as UserAttributes;
-
         return res.status(200).json({
             status: "success",
             method: req.method,
@@ -663,3 +647,56 @@ export const userGetsNewFoods = async (req: JwtPayload, res: Response) => {
         return res.status(500).json({ msg: `Internal server error` });
     }
 }
+
+export const userChangePassword = async (req: JwtPayload, res: Response) => {
+    try {
+      const { oldPassword, newPassword, confirmPassword } = req.body;
+      if (newPassword !== confirmPassword) {
+        return res.status(400).json({
+          message: `Password Mismatch`
+        })
+      }
+      const userid = req.user.id;
+      const user: any = await UserInstance.findOne({
+        where: { id: userid },
+      }) as unknown as UserAttributes;
+  
+      const confirm = await bcrypt.compare(oldPassword, user.password)
+      if (!confirm) return res.status(400).json({
+        message: `Wrong Password`
+      })
+      const token = await GenerateSignature({
+        id: user.id,
+        email: user.email
+      })
+    //   res.cookie('token', token)
+      const new_salt = await GenerateSalt()
+      const hash = await hashPassword(newPassword, new_salt)
+      const updatedPassword = await UserInstance.update(
+        {
+          password: hash,
+          salt: new_salt
+        },
+        { where: { id: userid } }
+      ) as unknown as UserAttributes;
+  
+      if (updatedPassword) {
+        return res.status(200).json({
+          message: "You have successfully changed your password",
+          id: user.id,
+          email: user.email,
+          role: user.role,
+          token
+        });
+      }
+      return res.status(400).json({
+        message: "Unsuccessful, contact Admin",
+        user
+      });
+    } catch (err: any) {
+      console.log(err.message)
+      return res.status(500).json({
+        message: `Internal Server Error`
+      })
+    }
+  };

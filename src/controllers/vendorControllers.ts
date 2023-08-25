@@ -50,7 +50,6 @@ export const verifyVendor = async (
       message: `${verifiedRegNo.findCompany.company_name} is verified`,
       company_name: `${verifiedRegNo.findCompany.company_name}`,
       registration_Number: `${verifiedRegNo.findCompany.reg_no}`,
-      token
     });
   } catch (err:any) {
     console.log(err.message);
