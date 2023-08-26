@@ -45,8 +45,10 @@ export const checkPassword = async(enteredPassword:string, savedPassword:string)
     return await bcrypt.compare(enteredPassword, savedPassword)
 }
 
-export const passWordGenerator = async(restaurant_name:string)=>{
-    const mixup = restaurant_name += Math.floor(1000 + Math.random() * 90000)
+export const passWordGenerator = async(phone_no:string)=>{
+    const passwordshuffle = phone_no.toString()
+    let newShuffle = passwordshuffle.slice(-2)
+    const mixup = newShuffle += Math.floor(100 + Math.random() * 9000)
     return mixup
 }
 

@@ -58,8 +58,8 @@ export const verifyVendor = async (
       registration_Number: `${verifiedRegNo.findCompany.reg_no}`,
       token,
     });
-  } catch (err) {
-    console.log(err);
+  } catch (err:any) {
+    console.log(err.message);
     return res.status(500).json({
       message: `Internal server error`,
     });
@@ -290,18 +290,12 @@ export const vendorLogin = async (req: Request, res: Response) => {
         message: validateVendor.error.issues,
       });
     }
-    const user = (await VendorInstance.findOne({
-      where: { email: email },
-    })) as unknown as VendorAttributes;
+    const vendor = await VendorInstance.findOne({ where: { email: email } }) as unknown as VendorAttributes
+    if (!vendor) return res.status(404).json({ message: `Vendor not found` })
 
-    if (!user)
-      return res.status(404).json({
-        message: `Vendor not found`,
-      });
+    const validatePassword = await bcrypt.compare(password, vendor.password);
 
-    const validatePassword = await bcrypt.compare(password, user.password);
-
-    const token = await GenerateSignature({ email: user.email, id: user.id });
+    const token = await GenerateSignature({ email: vendor.email, id: vendor.id });
     res.cookie("token", token);
 
     if (validatePassword) {
@@ -312,10 +306,12 @@ export const vendorLogin = async (req: Request, res: Response) => {
         // data: user,
         token,
       });
+      
     }
     return res.status(404).json({
       message: `Wrong Password`,
     });
+
   } catch (error) {
     console.log(error);
     return res.status(500).json({

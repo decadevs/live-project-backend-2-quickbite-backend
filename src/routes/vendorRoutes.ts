@@ -1,7 +1,6 @@
 import express from "express";
 import {
   authForVerifiedVendor,
-  auth,
   vendorauth,
 } from "../middleware/authorizations";
 import { upload } from "../middleware/upload";
