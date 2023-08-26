@@ -112,8 +112,6 @@ export const registerUser = async (req:Request, res:Response, next:NextFunction)
             phone_no} = req.body
         const userId = v4()
 
-        console.log(req.body)
-
         //validate input
         if(password !== confirm_password) return res.status(400).json({message: `Password Mismatch`})
 
@@ -216,8 +214,7 @@ export const registerUser = async (req:Request, res:Response, next:NextFunction)
 export const verifyOtp = async(req:JwtPayload, res:Response, next:NextFunction)=>{
     try {
         const otp = req.body.otp
-        const userId = req.user.id
-        console.log("CHECK",req.body)
+        const userId = req.user.payload.id
 
         const user:any = await UserInstance.findOne({where:{id:userId}}) as unknown as UserAttributes
     
@@ -255,7 +252,7 @@ export const verifyOtp = async(req:JwtPayload, res:Response, next:NextFunction)=
 
 export const reSendOtp = async(req:JwtPayload, res:Response, next:NextFunction)=>{
    try {
-    const userId = req.user.id
+    const userId = req.user.payload.id
     const user:JwtPayload = await UserInstance.findOne({where:{id:userId}}) as unknown as UserAttributes
 
     //generate OTP
@@ -372,7 +369,7 @@ export const getAllVendors = async (req: Request, res: Response, next: NextFunct
 export const userGetFulfilledOrders = async (req: JwtPayload, res: Response) => {
 
     try{
-        const userId = req.user.id;
+        const userId = req.user.payload.id
 
 
         const fulfilledOrders = await OrderInstance.findAll({
@@ -400,7 +397,7 @@ export const userGetFulfilledOrders = async (req: JwtPayload, res: Response) => 
 
 export const userGetsReadyOrders = async(req:JwtPayload, res: Response) => {
     try{
-        const userId = req.user.id;
+        const userId = req.user.payload.id
         const readyOrders = await OrderInstance.findAll({
             where: {
                 userId: userId,
@@ -423,7 +420,7 @@ export const userGetsReadyOrders = async(req:JwtPayload, res: Response) => {
 
 export const userGetsPendingOrders = async(req:JwtPayload, res:Response) => {
     try{
-        const userId = req.user.id
+        const userId = req.user.payload.id
         const pendingOrders = await OrderInstance.findAll({
             where: {
                 userId: userId,
@@ -552,7 +549,7 @@ export const userChangeOrderStatus = async (req: JwtPayload, res: Response) => {
 
 export const userEditProfile = async (req: JwtPayload, res: Response) => {
     try {
-        const userId = req.user.id;
+        const userId = req.user.payload.id
         const { email, firstname, lastname, address, phone_no } = req.body;
 
         const user = await UserInstance.findOne({ where: { id: userId } }) as unknown as UserAttributes;
@@ -647,7 +644,7 @@ export const userChangePassword = async (req: JwtPayload, res: Response) => {
           message: `Password Mismatch`
         })
       }
-      const userid = req.user.id;
+      const userid = req.user.payload.id
       const user: any = await UserInstance.findOne({
         where: { id: userid },
       }) as unknown as UserAttributes;
