@@ -13,10 +13,7 @@ import { mailUserOtp } from '../utils/emailFunctions';
 import { OrderAttributes, OrderInstance } from "../models/orderModel";
 import { Op } from 'sequelize';
 
-// newly added imports
-import { isNamespaceExportDeclaration } from "typescript";
-
-export const userGetsAllFoods=async(req:JwtPayload,res:Response)=>{
+export const userGetsAllFoods=async(req:JwtPayload, res:Response)=>{
     try{
     const allFood = await FoodInstance.findAll({});
     if(!allFood) return res.status(404).json({msg: `Foods not found`})
@@ -286,7 +283,6 @@ export const reSendOtp = async(req:JwtPayload, res:Response, next:NextFunction)=
    }
 }
 
-
 export const userLogIn = async (req:Request, res:Response, next:NextFunction) => {
     try {
   
@@ -337,11 +333,7 @@ export const userLogIn = async (req:Request, res:Response, next:NextFunction) =>
     }
 }
 
-export const getAllVendors = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) => {
+export const getAllVendors = async (req: Request, res: Response, next: NextFunction) => {
     try {
       let page = 1;
       if (req.query.page) {
@@ -377,8 +369,7 @@ export const getAllVendors = async (
     }
 };
 
-  // newly added functions 
-  export const userGetFulfilledOrders = async (req: JwtPayload, res: Response) => {
+export const userGetFulfilledOrders = async (req: JwtPayload, res: Response) => {
 
     try{
         const userId = req.user.id;
@@ -407,7 +398,7 @@ export const getAllVendors = async (
 
 };
 
-  export const userGetsReadyOrders = async(req:JwtPayload, res: Response) => {
+export const userGetsReadyOrders = async(req:JwtPayload, res: Response) => {
     try{
         const userId = req.user.id;
         const readyOrders = await OrderInstance.findAll({
@@ -430,7 +421,7 @@ export const getAllVendors = async (
     }
 }
 
-  export const userGetsPendingOrders = async(req:JwtPayload, res:Response) => {
+export const userGetsPendingOrders = async(req:JwtPayload, res:Response) => {
     try{
         const userId = req.user.id
         const pendingOrders = await OrderInstance.findAll({
@@ -699,4 +690,4 @@ export const userChangePassword = async (req: JwtPayload, res: Response) => {
         message: `Internal Server Error`
       })
     }
-  };
+};
