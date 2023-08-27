@@ -700,10 +700,12 @@ export const earningsAndRevenue = async (req:JwtPayload, res:Response)=>{
     const id = req.vendor.id;
     const vendor = await VendorInstance.findOne({where: {id:id}}) as unknown as VendorAttributes;
     if(!vendor) return res.status(404).json({message: `Details not fetched`})
+    const arr = [];
+  arr.push(vendor.earnings,
+    vendor.revenue)
     return res.status(200).json({
   message: `Details fetched`,
-  earnings: vendor.earnings,
-  revenue: vendor.revenue
+ arr
 })
   }catch(err:any){
     console.log(err.message)
