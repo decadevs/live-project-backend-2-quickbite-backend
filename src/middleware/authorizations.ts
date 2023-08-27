@@ -23,7 +23,6 @@ export const authForVerifiedVendor = async(req:JwtPayload, res:Response, next:Ne
     }
     
     const decoded:any = jwt.verify(token, `${process.env.APP_SECRET}`)
-    
     if(!decoded) return res.status(401).send({
         status: "error",
         data: "You have not been verified"

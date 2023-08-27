@@ -13,10 +13,7 @@ import { mailUserOtp } from '../utils/emailFunctions';
 import { OrderAttributes, OrderInstance } from "../models/orderModel";
 import { Op } from 'sequelize';
 
-// newly added imports
-import { isNamespaceExportDeclaration } from "typescript";
-
-export const userGetsAllFoods=async(req:JwtPayload,res:Response)=>{
+export const userGetsAllFoods=async(req:JwtPayload, res:Response)=>{
     try{
     const allFood = await FoodInstance.findAll({});
     if(!allFood) return res.status(404).json({msg: `Foods not found`})
@@ -114,8 +111,6 @@ export const registerUser = async (req:Request, res:Response, next:NextFunction)
             address,
             phone_no} = req.body
         const userId = v4()
-
-        console.log(req.body)
 
         //validate input
         if(password !== confirm_password) return res.status(400).json({message: `Password Mismatch`})
@@ -219,8 +214,7 @@ export const registerUser = async (req:Request, res:Response, next:NextFunction)
 export const verifyOtp = async(req:JwtPayload, res:Response, next:NextFunction)=>{
     try {
         const otp = req.body.otp
-        const userId = req.user.id
-        console.log("CHECK",req.body)
+        const userId = req.user.payload.id
 
         const user:any = await UserInstance.findOne({where:{id:userId}}) as unknown as UserAttributes
     
@@ -258,7 +252,7 @@ export const verifyOtp = async(req:JwtPayload, res:Response, next:NextFunction)=
 
 export const reSendOtp = async(req:JwtPayload, res:Response, next:NextFunction)=>{
    try {
-    const userId = req.user.id
+    const userId = req.user.payload.id
     const user:JwtPayload = await UserInstance.findOne({where:{id:userId}}) as unknown as UserAttributes
 
     //generate OTP
@@ -285,7 +279,6 @@ export const reSendOtp = async(req:JwtPayload, res:Response, next:NextFunction)=
     })  
    }
 }
-
 
 export const userLogIn = async (req:Request, res:Response, next:NextFunction) => {
     try {
@@ -316,7 +309,7 @@ export const userLogIn = async (req:Request, res:Response, next:NextFunction) =>
            //check verified
            
            //generate token
-           const token = jwt.sign({id:user.id, email:user.email},`${APP_SECRET}` )  
+           const token = await GenerateSignature({id:user.id, email:user.email})  
              res.cookie('token', token)
             return res.status(200).json({
                 status: "success",
@@ -337,11 +330,7 @@ export const userLogIn = async (req:Request, res:Response, next:NextFunction) =>
     }
 }
 
-export const getAllVendors = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) => {
+export const getAllVendors = async (req: Request, res: Response, next: NextFunction) => {
     try {
       let page = 1;
       if (req.query.page) {
@@ -418,7 +407,7 @@ export const getSingleVendors = async (
   export const userGetFulfilledOrders = async (req: JwtPayload, res: Response) => {
 
     try{
-        const userId = req.user.id;
+        const userId = req.user.id
 
 
         const fulfilledOrders = await OrderInstance.findAll({
@@ -444,9 +433,9 @@ export const getSingleVendors = async (
 
 };
 
-  export const userGetsReadyOrders = async(req:JwtPayload, res: Response) => {
+export const userGetsReadyOrders = async(req:JwtPayload, res: Response) => {
     try{
-        const userId = req.user.id;
+        const userId = req.user.id
         const readyOrders = await OrderInstance.findAll({
             where: {
                 userId: userId,
@@ -467,7 +456,7 @@ export const getSingleVendors = async (
     }
 }
 
-  export const userGetsPendingOrders = async(req:JwtPayload, res:Response) => {
+export const userGetsPendingOrders = async(req:JwtPayload, res:Response) => {
     try{
         const userId = req.user.id
         const pendingOrders = await OrderInstance.findAll({
@@ -477,15 +466,15 @@ export const getSingleVendors = async (
             }
         });
         if(!pendingOrders || pendingOrders.length === 0){
-            return res.status(404).json({msg:'No pending orders found for this user'})
+            return res.status(404).json({message:'No pending orders found for this user'})
         }
         return res.status(200).json({
-            msg:'Pending orders fetched',
+            message:'Pending orders fetched',
             pendingOrders,
         });
     }catch(error:any){
         console.log(error.message);
-        return res.status(500).json({msg:'Internal server error'});
+        return res.status(500).json({message:'Internal server error'});
     }
 }
  
@@ -598,7 +587,8 @@ export const userChangeOrderStatus = async (req: JwtPayload, res: Response) => {
 
 export const userEditProfile = async (req: JwtPayload, res: Response) => {
     try {
-        const userId = req.user.id;
+        console.log(req.user)
+        const userId = req.user.payload.id
         const { email, firstname, lastname, address, phone_no } = req.body;
 
         const user = await UserInstance.findOne({ where: { id: userId } }) as unknown as UserAttributes;
@@ -693,7 +683,7 @@ export const userChangePassword = async (req: JwtPayload, res: Response) => {
           message: `Password Mismatch`
         })
       }
-      const userid = req.user.id;
+      const userid = req.user.payload.id
       const user: any = await UserInstance.findOne({
         where: { id: userid },
       }) as unknown as UserAttributes;
@@ -736,4 +726,4 @@ export const userChangePassword = async (req: JwtPayload, res: Response) => {
         message: `Internal Server Error`
       })
     }
-  };
+};
