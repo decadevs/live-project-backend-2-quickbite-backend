@@ -13,7 +13,7 @@ export interface OrderAttributes {
     status: string;
     userId: string;
     vendorId: string;
-    isPaid: boolean
+    isPaid: boolean;
 }
 
 export class OrderInstance extends Model<OrderAttributes> {
@@ -67,7 +67,7 @@ OrderInstance.init(
         type: DataTypes.BOOLEAN,
         allowNull: false,
         defaultValue: false,
-    }
+    },
   },
   {
     sequelize: db,
