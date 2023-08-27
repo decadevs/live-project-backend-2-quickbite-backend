@@ -309,7 +309,7 @@ export const userLogIn = async (req:Request, res:Response, next:NextFunction) =>
            //check verified
            
            //generate token
-           const token = jwt.sign({id:user.id, email:user.email},`${APP_SECRET}` )  
+           const token = await GenerateSignature({id:user.id, email:user.email})  
              res.cookie('token', token)
             return res.status(200).json({
                 status: "success",
@@ -369,7 +369,7 @@ export const getAllVendors = async (req: Request, res: Response, next: NextFunct
 export const userGetFulfilledOrders = async (req: JwtPayload, res: Response) => {
 
     try{
-        const userId = req.user.payload.id
+        const userId = req.user.id
 
 
         const fulfilledOrders = await OrderInstance.findAll({
@@ -397,7 +397,7 @@ export const userGetFulfilledOrders = async (req: JwtPayload, res: Response) => 
 
 export const userGetsReadyOrders = async(req:JwtPayload, res: Response) => {
     try{
-        const userId = req.user.payload.id
+        const userId = req.user.id
         const readyOrders = await OrderInstance.findAll({
             where: {
                 userId: userId,
@@ -420,7 +420,7 @@ export const userGetsReadyOrders = async(req:JwtPayload, res: Response) => {
 
 export const userGetsPendingOrders = async(req:JwtPayload, res:Response) => {
     try{
-        const userId = req.user.payload.id
+        const userId = req.user.id
         const pendingOrders = await OrderInstance.findAll({
             where: {
                 userId: userId,
@@ -428,15 +428,15 @@ export const userGetsPendingOrders = async(req:JwtPayload, res:Response) => {
             }
         });
         if(!pendingOrders || pendingOrders.length === 0){
-            return res.status(404).json({msg:'No pending orders found for this user'})
+            return res.status(404).json({message:'No pending orders found for this user'})
         }
         return res.status(200).json({
-            msg:'Pending orders fetched',
+            message:'Pending orders fetched',
             pendingOrders,
         });
     }catch(error:any){
         console.log(error.message);
-        return res.status(500).json({msg:'Internal server error'});
+        return res.status(500).json({message:'Internal server error'});
     }
 }
  
@@ -549,6 +549,7 @@ export const userChangeOrderStatus = async (req: JwtPayload, res: Response) => {
 
 export const userEditProfile = async (req: JwtPayload, res: Response) => {
     try {
+        console.log(req.user)
         const userId = req.user.payload.id
         const { email, firstname, lastname, address, phone_no } = req.body;
 
