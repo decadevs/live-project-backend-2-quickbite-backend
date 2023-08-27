@@ -695,3 +695,21 @@ export const orderByFood = async (req:JwtPayload, res:Response)=>{
     })
   }
 }
+
+export const earningsAndRevenue = async (req:JwtPayload, res:Response)=>{
+  try{
+    const id = req.vendor.id;
+    const vendor = await VendorInstance.findOne({where: {id:id}}) as unknown as VendorAttributes;
+    if(!vendor) return res.status(404).json({message: `Details not fetched`})
+    return res.status(200).json({
+  message: `Details fetched`,
+  earnings: vendor.earnings,
+  revenue: vendor.revenue
+})
+  }catch(err:any){
+    console.log(err.message)
+    return res.status(500).json({
+      message: `Internal Server Error`
+    })
+  }
+}
