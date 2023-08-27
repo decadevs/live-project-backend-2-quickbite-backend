@@ -315,7 +315,7 @@ export const userLogIn = async (req:Request, res:Response, next:NextFunction) =>
                 status: "success",
                 method: req.method,
                 message: "Login Successful",
-                user,
+                data: user,
                 token
             }) 
 
@@ -553,9 +553,9 @@ export const userEditProfile = async (req: JwtPayload, res: Response) => {
         const userId = req.user.payload.id
         const { email, firstname, lastname, address, phone_no } = req.body;
 
-        const user = await UserInstance.findOne({ where: { id: userId } }) as unknown as UserAttributes;
+        const user2 = await UserInstance.findOne({ where: { id: userId } }) as unknown as UserAttributes;
 
-        if (!user) {
+        if (!user2) {
             return res.status(400).json({
                 status: "error",
                 method: req.method,
@@ -592,13 +592,14 @@ export const userEditProfile = async (req: JwtPayload, res: Response) => {
         const updatedUser:any = await UserInstance.update(updatedUserFields, {
             where: { id: userId },
         }) as unknown as UserAttributes;
-        
+        const user = await UserInstance.findOne({where: {id: userId}}) as unknown as UserAttributes;
+        console.log(user2)
 
         return res.status(200).json({
             status: "success",
             method: req.method,
             message: "user updated successfully",
-            updatedUser
+            data: user
         });
 
     } catch (error) {
