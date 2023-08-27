@@ -34,7 +34,6 @@ export const userGetsAllFoods=async(req: Request,res:Response)=>{
     }
 }
 
-
 export const userGetsAllFoodByAVendor = async (req: JwtPayload, res: Response) => {
     try {
         const vendorId = req.query.vendorId;
@@ -327,7 +326,7 @@ export const userLogIn = async (req:Request, res:Response, next:NextFunction) =>
                 status: "success",
                 method: req.method,
                 message: "Login Successful",
-                userData: user,
+                user,
                 token
             }) 
 
@@ -645,3 +644,56 @@ export const userGetsNewFoods = async (req: JwtPayload, res: Response) => {
         return res.status(500).json({ msg: `Internal server error` });
     }
 }
+
+export const userChangePassword = async (req: JwtPayload, res: Response) => {
+    try {
+      const { oldPassword, newPassword, confirmPassword } = req.body;
+      if (newPassword !== confirmPassword) {
+        return res.status(400).json({
+          message: `Password Mismatch`
+        })
+      }
+      const userid = req.user.id;
+      const user: any = await UserInstance.findOne({
+        where: { id: userid },
+      }) as unknown as UserAttributes;
+  
+      const confirm = await bcrypt.compare(oldPassword, user.password)
+      if (!confirm) return res.status(400).json({
+        message: `Wrong Password`
+      })
+      const token = await GenerateSignature({
+        id: user.id,
+        email: user.email
+      })
+    //   res.cookie('token', token)
+      const new_salt = await GenerateSalt()
+      const hash = await hashPassword(newPassword, new_salt)
+      const updatedPassword = await UserInstance.update(
+        {
+          password: hash,
+          salt: new_salt
+        },
+        { where: { id: userid } }
+      ) as unknown as UserAttributes;
+  
+      if (updatedPassword) {
+        return res.status(200).json({
+          message: "You have successfully changed your password",
+          id: user.id,
+          email: user.email,
+          role: user.role,
+          token
+        });
+      }
+      return res.status(400).json({
+        message: "Unsuccessful, contact Admin",
+        user
+      });
+    } catch (err: any) {
+      console.log(err.message)
+      return res.status(500).json({
+        message: `Internal Server Error`
+      })
+    }
+  };

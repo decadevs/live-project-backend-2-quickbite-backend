@@ -1,6 +1,7 @@
 import { userGetsAllFoods,userGetsAllFoodByAVendor, userGetPopularFoods, getAllVendors,
 registerUser, userLogIn, verifyOtp, userGetsNewFoods, 
-userGetPopularVendors, reSendOtp, userGetFulfilledOrders, userGetsReadyOrders, userGetsPendingOrders, userMakeOrder, userChangeOrderStatus, userEditProfile} from '../controllers/userControllers'
+userGetPopularVendors, reSendOtp, userChangePassword,
+userGetFulfilledOrders, userGetsReadyOrders, userGetsPendingOrders, userMakeOrder, userChangeOrderStatus, userEditProfile} from '../controllers/userControllers'
 import {Router} from 'express';
 import {auth} from '../middleware/authorizations'
 
@@ -22,4 +23,5 @@ router.get('/readyOrders', auth , userGetsReadyOrders)
 router.get('/getNewFoods', userGetsNewFoods)
 router.get('/pendingOrders', auth , userGetsPendingOrders)
 router.put('/editprofile', auth, userEditProfile);
+router.post('/changePassword', auth, userChangePassword)
 export default router;
