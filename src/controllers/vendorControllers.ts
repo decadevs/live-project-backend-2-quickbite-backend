@@ -521,7 +521,6 @@ export const changeStatus = async(req: JwtPayload, res: Response) => {
 export const vendorGetsOrderCount = async (req: JwtPayload, res: Response) => {
   try {
     const vendorId = req.vendor.id;
-    console.log(vendorId)
     const vendorOrders:any = await OrderInstance.findAll({ where: { vendorId: vendorId } }) as unknown as OrderAttributes
     const vendor:any = await VendorInstance.findOne({where: {id:vendorId}})
     const orders = vendor.orders
