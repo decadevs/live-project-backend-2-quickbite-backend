@@ -10,7 +10,7 @@ const router = Router();
 router.post('/register', registerUser);
 router.post('/login', userLogIn);
 router.post('/verify', auth, verifyOtp);
-router.post('/makeorder', userMakeOrder);
+router.post('/makeorder', auth, userMakeOrder);
 router.post('/changestatus', auth, userChangeOrderStatus);
 router.get('/resend', auth, reSendOtp);
 router.get("/allfoods", userGetsAllFoods)
