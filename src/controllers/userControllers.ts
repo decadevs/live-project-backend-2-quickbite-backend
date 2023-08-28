@@ -9,7 +9,7 @@ import {UserInstance} from '../models/userModel'
 import { UserAttributes } from '../models/userModel'; 
 import { validateUserSchema } from '../utils/validators';
 import { hashPassword, GenerateOTP, GenerateSignature, GenerateSalt } from '../utils/helpers';
-import { mailUserOtp } from '../utils/emailFunctions';
+import { mailUserOtp, mailOrder, mailVendorOrder } from '../utils/emailFunctions';
 import { OrderAttributes, OrderInstance } from "../models/orderModel";
 import { Op } from 'sequelize';
 
@@ -398,11 +398,6 @@ export const getSingleVendors = async (
     }
 };
 
-
-
-
-
-
   // newly added functions 
   export const userGetFulfilledOrders = async (req: JwtPayload, res: Response) => {
 
@@ -478,23 +473,25 @@ export const userGetsPendingOrders = async(req:JwtPayload, res:Response) => {
     }
 }
  
-export const userMakeOrder = async (req:Request, res:Response, next:NextFunction) => {
+export const userMakeOrder = async (req:JwtPayload, res:Response, next:NextFunction) => {
     try {
-        const {vendorId, foodId, quantity} = req.body
-
+        const {food_items,
+            cartTotal,
+            address} = req.body
+           const userid =  req.user.payload.id
         // const user = await UserInstance.findOne({where: {id: userId}}) as unknown as UserAttributes
+        const foodid = food_items[0].id
+        const food = await FoodInstance.findOne({where: {id:foodid}}) as unknown as FoodAttributes
+        const vendor = await VendorInstance.findOne({where: {id: food.vendorId}}) as unknown as VendorAttributes
+        vendor.orders = vendor.orders++
+        let arr:any = []
+        arr = food_items.map(async (food:any)=>{
+            const foods = await FoodInstance.findOne({where: {id:food.id}}) as unknown as FoodAttributes
+            foods.order_count = foods.order_count + 1
+            arr.push(await food)
+            return foods
+        })
 
-        const vendor = await VendorInstance.findOne({where: {id: vendorId}}) as unknown as VendorAttributes
-
-        const food = await FoodInstance.findOne({where: {id: foodId}}) as unknown as FoodAttributes
-
-        // if(!user){
-        //     return res.status(400).json({
-        //         status: "error",
-        //         method: req.method,
-        //         message: "user not found"
-        //     })
-        // }
         if(!vendor){
             return res.status(400).json({
                 status: "error",
@@ -502,34 +499,34 @@ export const userMakeOrder = async (req:Request, res:Response, next:NextFunction
                 message: "vendor not found"
             })
         }
-        if(!food){
-            return res.status(400).json({
-                status: "error",
-                method: req.method,
-                message: "food not found"
-            })
-        }
+        const user = await UserInstance.findOne({where: {id:userid}}) as unknown as UserAttributes
+        const userEmail = user.email
+        const vendorEmail = vendor.email
+        mailOrder(userEmail)
+        mailVendorOrder(vendorEmail)
 
-        const amount = food.price * quantity
         const orderId = v4()
-       
-            // const order = await OrderInstance.create({
-            //     id: orderId,
-            //     foodid: food.id,
-            //     food_name: food.name,
-            //     quantity: quantity,
-            //     amount: amount,
-            //     status: "pending",
-            //     userId: "",
-            //     vendorId: vendor.id,
-            //     isPaid: false,
-            // }) as unknown as OrderAttributes
 
+        const order = await OrderInstance.create({
+                id: orderId,
+                food_items: food_items,
+                amount: cartTotal,
+                vendorId: vendor.id,
+                address: address,
+                status: 'pending',
+                userId: userid,
+                isPaid: true
+            }) as unknown as OrderAttributes
+            if(order){
+                return res.status(200).json({
+                    message: `Order created succesfully`,
+                    order
+                })
+            }
         return res.status(200).json({
-            status: "success",
+            status: "failed",
             method: req.method,
-            message: "order created successfuly",
-        //    order
+            message: "order not created"
         })
 
 

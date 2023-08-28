@@ -40,11 +40,7 @@ OrderInstance.init(
       primaryKey: true,
     },
     food_items: {
-        type: DataTypes.ARRAY,
-        references:{
-          model: FoodInstance,
-          key: 'id'
-        },
+        type: DataTypes.JSON,
       allowNull: false,
     },
     address: {
