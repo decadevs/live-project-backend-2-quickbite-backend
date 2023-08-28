@@ -2,18 +2,26 @@
 import { DataTypes, Model } from 'sequelize';
 import { db } from '../config';
 import { UserInstance } from './userModel';
+import { FoodInstance } from './foodModel';
 
+
+interface FoodDetails {
+  name: string;
+  description: string;
+  id: string
+  price: number
+  quantity: number
+}
 
 export interface OrderAttributes {
     id: string;
-    foodid: string;
-    food_name: string;
-    quantity: number;
+    food_items: FoodDetails[];
     amount: number;
     status: string;
     userId: string;
     vendorId: string;
     isPaid: boolean
+    address: string
 }
 
 export class OrderInstance extends Model<OrderAttributes> {
@@ -31,16 +39,16 @@ OrderInstance.init(
       type: DataTypes.UUID,
       primaryKey: true,
     },
-    foodid: {
+    food_items: {
+        type: DataTypes.ARRAY,
+        references:{
+          model: FoodInstance,
+          key: 'id'
+        },
+      allowNull: false,
+    },
+    address: {
       type: DataTypes.STRING,
-      allowNull: false,
-    },
-    food_name: {
-        type: DataTypes.STRING,
-      allowNull: false,
-    },
-    quantity: {
-      type: DataTypes.INTEGER,
       allowNull: false,
     },
     amount: {

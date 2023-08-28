@@ -513,23 +513,23 @@ export const userMakeOrder = async (req:Request, res:Response, next:NextFunction
         const amount = food.price * quantity
         const orderId = v4()
        
-            const order = await OrderInstance.create({
-                id: orderId,
-                foodid: food.id,
-                food_name: food.name,
-                quantity: quantity,
-                amount: amount,
-                status: "pending",
-                userId: "",
-                vendorId: vendor.id,
-                isPaid: false,
-            }) as unknown as OrderAttributes
+            // const order = await OrderInstance.create({
+            //     id: orderId,
+            //     foodid: food.id,
+            //     food_name: food.name,
+            //     quantity: quantity,
+            //     amount: amount,
+            //     status: "pending",
+            //     userId: "",
+            //     vendorId: vendor.id,
+            //     isPaid: false,
+            // }) as unknown as OrderAttributes
 
         return res.status(200).json({
             status: "success",
             method: req.method,
             message: "order created successfuly",
-            order
+        //    order
         })
 
 
