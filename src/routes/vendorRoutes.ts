@@ -18,7 +18,7 @@ router.get("/getallfood",vendorauth, vendorgetsAllHisFood);
 router.get("/getsinglefood", vendorauth, vendorGetsSingleFood);
 router.post('/login', vendorLogin)
 router.post('/passwordchange', vendorauth, vendorChangePassword)
-router.patch('/editprofile', vendorauth, upload.single("cover_image"), vendorEditProfile)
+router.put('/editprofile', vendorauth, upload.single("cover_image"), vendorEditProfile)
 router.put('/editfood/:id', vendorauth,  updateFood  )
 router.put('/:foodID/ready', vendorauth, changeStatus )
 router.get('/getsingleprofile', vendorauth, vendorGetsProfile)
