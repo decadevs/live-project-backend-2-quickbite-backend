@@ -7,7 +7,7 @@ import {vendorcreatesFood,vendorLogin, vendorGetsProfile,
     verifyVendor, registerVendor, vendorGetsOrderCount, vendorGetHisPopularFoods,
      vendorTotalRevenue, vendorAvailability, singleOrderDetails, 
      DeleteAllFood, DeleteSingleFood, orderByFood, vendorTotalEarnings, 
-     changeStatus, updateFood } from "../controllers/vendorControllers";
+     changeStatus, updateFood, earningsAndRevenue } from "../controllers/vendorControllers";
 
 const router = express.Router();
 
@@ -31,4 +31,5 @@ router.get('/singleorder', vendorauth, singleOrderDetails)
 router.get('/popularfoods', vendorauth, vendorGetHisPopularFoods)
 router.get('/totalearnings', vendorauth, vendorTotalEarnings)
 router.get('/orderbyfood', vendorauth, orderByFood)
+router.get('/earningsandrevenue', vendorauth, earningsAndRevenue)
 export default router;

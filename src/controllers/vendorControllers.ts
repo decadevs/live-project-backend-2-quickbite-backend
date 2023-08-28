@@ -522,7 +522,6 @@ export const changeStatus = async(req: JwtPayload, res: Response) => {
 export const vendorGetsOrderCount = async (req: JwtPayload, res: Response) => {
   try {
     const vendorId = req.vendor.id;
-    console.log(vendorId)
     const vendorOrders:any = await OrderInstance.findAll({ where: { vendorId: vendorId } }) as unknown as OrderAttributes
     const vendor:any = await VendorInstance.findOne({where: {id:vendorId}})
     const orders = vendor.orders
@@ -689,6 +688,26 @@ export const orderByFood = async (req:JwtPayload, res:Response)=>{
       message: `Foods fetched by Orders`,
       vendorFoodArr
   })
+  }catch(err:any){
+    console.log(err.message)
+    return res.status(500).json({
+      message: `Internal Server Error`
+    })
+  }
+}
+
+export const earningsAndRevenue = async (req:JwtPayload, res:Response)=>{
+  try{
+    const id = req.vendor.id;
+    const vendor = await VendorInstance.findOne({where: {id:id}}) as unknown as VendorAttributes;
+    if(!vendor) return res.status(404).json({message: `Details not fetched`})
+    const earningRevenueArray = [];
+    earningRevenueArray.push({earnings: vendor.earnings, revenue:
+    vendor.revenue})
+    return res.status(200).json({
+  message: `Details fetched`,
+  earningRevenueArray
+})
   }catch(err:any){
     console.log(err.message)
     return res.status(500).json({
