@@ -366,7 +366,45 @@ export const getAllVendors = async (req: Request, res: Response, next: NextFunct
     }
 };
 
-export const userGetFulfilledOrders = async (req: JwtPayload, res: Response) => {
+export const getSingleVendors = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+        const vendorId = req.params.id
+  
+      const vendor = await VendorInstance.findAll({where: {id: vendorId}});
+
+      if(!vendor){
+        return res.status(400).send({
+            status: "error",
+            method: req.method,
+            message:"user not found"
+        }) 
+      }
+
+      return res.status(200).json({
+        status: "success",
+        method: req.method,
+        message: "retrievd vendor successfully",
+        vendor  
+      });
+    } catch (err) {
+      console.error("Error executing getUsers:", err);
+      return res.status(500).json({
+        Error: "Internal Server Error",
+      });
+    }
+};
+
+
+
+
+
+
+  // newly added functions 
+  export const userGetFulfilledOrders = async (req: JwtPayload, res: Response) => {
 
     try{
         const userId = req.user.id
@@ -475,23 +513,23 @@ export const userMakeOrder = async (req:Request, res:Response, next:NextFunction
         const amount = food.price * quantity
         const orderId = v4()
        
-            const order = await OrderInstance.create({
-                id: orderId,
-                foodid: food.id,
-                food_name: food.name,
-                quantity: quantity,
-                amount: amount,
-                status: "pending",
-                userId: "",
-                vendorId: vendor.id,
-                isPaid: false,
-            }) as unknown as OrderAttributes
+            // const order = await OrderInstance.create({
+            //     id: orderId,
+            //     foodid: food.id,
+            //     food_name: food.name,
+            //     quantity: quantity,
+            //     amount: amount,
+            //     status: "pending",
+            //     userId: "",
+            //     vendorId: vendor.id,
+            //     isPaid: false,
+            // }) as unknown as OrderAttributes
 
         return res.status(200).json({
             status: "success",
             method: req.method,
             message: "order created successfuly",
-            order
+        //    order
         })
 
 
