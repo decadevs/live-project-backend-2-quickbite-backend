@@ -526,79 +526,6 @@ export const userGetsPendingOrders = async (req: JwtPayload, res: Response) => {
   }
 };
 
-export const userMakeOrder = async (
-  req: JwtPayload,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const { food_items, cartTotal, address } = req.body;
-    const userid = req.user.payload.id;
-    // const user = await UserInstance.findOne({where: {id: userId}}) as unknown as UserAttributes
-    const foodid = food_items[0].id;
-    const food = (await FoodInstance.findOne({
-      where: { id: foodid },
-    })) as unknown as FoodAttributes;
-    const vendor = (await VendorInstance.findOne({
-      where: { id: food.vendorId },
-    })) as unknown as VendorAttributes;
-    vendor.orders = vendor.orders++;
-    let arr: any = [];
-    arr = food_items.map(async (food: any) => {
-      const foods = (await FoodInstance.findOne({
-        where: { id: food.id },
-      })) as unknown as FoodAttributes;
-      foods.order_count = foods.order_count + 1;
-      arr.push(await food);
-      return foods;
-    });
-
-    if (!vendor) {
-      return res.status(400).json({
-        status: "error",
-        method: req.method,
-        message: "vendor not found",
-      });
-    }
-    const user = (await UserInstance.findOne({
-      where: { id: userid },
-    })) as unknown as UserAttributes;
-    const userEmail = user.email;
-    const vendorEmail = vendor.email;
-    mailOrder(userEmail);
-    mailVendorOrder(vendorEmail);
-
-    const orderId = v4();
-
-    const order = (await OrderInstance.create({
-      id: orderId,
-      food_items: food_items,
-      amount: cartTotal,
-      vendorId: vendor.id,
-      address: address,
-      status: "pending",
-      userId: userid,
-      isPaid: true,
-    })) as unknown as OrderAttributes;
-    if (order) {
-      return res.status(200).json({
-        message: `Order created succesfully`,
-        order,
-      });
-    }
-    return res.status(200).json({
-      status: "failed",
-      method: req.method,
-      message: "order not created",
-    });
-  } catch (err) {
-    console.error("Error making order:", err);
-    return res.status(500).json({
-      Error: "Internal Server Error",
-    });
-  }
-};
-
 export const userChangeOrderStatus = async (req: JwtPayload, res: Response) => {
   try {
     const { orderId, status } = req.body;
@@ -636,6 +563,85 @@ export const userChangeOrderStatus = async (req: JwtPayload, res: Response) => {
     }
   } catch (err) {
     console.error("Error updating order:", err);
+    return res.status(500).json({
+      Error: "Internal Server Error",
+    });
+  }
+};
+
+// newly added functions
+
+export const userMakeOrder = async (
+  req: JwtPayload,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { food_items, cartTotal, address } = req.body;
+    const userid = req.user.payload.id;
+    const foodid = food_items[0].id;
+    const food = (await FoodInstance.findOne({
+      where: { id: foodid },
+    })) as unknown as FoodAttributes;
+    const vendor: any = await VendorInstance.findOne({
+      where: { id: food.vendorId },
+    }); //as unknown as VendorAttributes
+    if (!vendor) {
+      return res.status(400).json({
+        status: "error",
+        method: req.method,
+        message: "vendor not found",
+      });
+    }
+    vendor.orders += 1;
+    let cartTotal2 = Number(cartTotal);
+    vendor.revenue += Number(cartTotal2);
+    let companyEarn = cartTotal2 * 0.05;
+    let vendorEarn = cartTotal2 - companyEarn;
+    vendor.earnings += vendorEarn;
+    await vendor.save();
+    for (const food of food_items) {
+      const foodInstance: any = await FoodInstance.findOne({
+        where: { id: food.id },
+      });
+      if (foodInstance) {
+        foodInstance.order_count += 1;
+        await foodInstance.save();
+      }
+    }
+    const user = (await UserInstance.findOne({
+      where: { id: userid },
+    })) as unknown as UserAttributes;
+    const userEmail = user.email;
+    const vendorEmail = vendor.email;
+
+    const orderId = v4();
+
+    const order = (await OrderInstance.create({
+      id: orderId,
+      food_items: food_items,
+      amount: Number(cartTotal),
+      vendorId: vendor.id,
+      address: address,
+      status: "pending",
+      userId: userid,
+      isPaid: true,
+    })) as unknown as OrderAttributes;
+    if (order) {
+      mailOrder(userEmail);
+      mailVendorOrder(vendorEmail);
+      return res.status(200).json({
+        message: `Order created succesfully`,
+        order,
+      });
+    }
+    return res.status(200).json({
+      status: "failed",
+      method: req.method,
+      message: "order not created",
+    });
+  } catch (err) {
+    console.error("Error making order:", err);
     return res.status(500).json({
       Error: "Internal Server Error",
     });
