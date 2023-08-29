@@ -1,6 +1,11 @@
 import { Request, Response, NextFunction } from "express";
 import { v4 } from "uuid";
-import { GenerateSalt, passWordGenerator, hashPassword, GenerateSignature, } from "../utils/helpers";
+import {
+  GenerateSalt,
+  passWordGenerator,
+  hashPassword,
+  GenerateSignature,
+} from "../utils/helpers";
 import { axiosVerifyVendor } from "../utils/helpers";
 import { JwtPayload } from "jsonwebtoken";
 import { VendorAttributes, VendorInstance } from "../models/vendorModel";
@@ -8,11 +13,15 @@ import { emailHtml, sendmail } from "../utils/emailFunctions";
 import { GMAIL_USER } from "../config";
 import { zodSchema, validateFoodSchema } from "../utils/validators";
 import { FoodAttributes, FoodInstance } from "../models/foodModel";
-import { vendorLoginSchema } from '../utils/validators';
-import bcrypt from 'bcrypt';
+import { vendorLoginSchema } from "../utils/validators";
+import bcrypt from "bcrypt";
 import { OrderAttributes, OrderInstance } from "../models/orderModel";
 
-export const verifyVendor = async (req: Request, res: Response, next: NextFunction) => {
+export const verifyVendor = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const regNo: any = req.body.regNo;
     if (!regNo) {
@@ -38,16 +47,16 @@ export const verifyVendor = async (req: Request, res: Response, next: NextFuncti
 
     const token = await GenerateSignature({
       regNo: verifiedRegNo.findCompany.reg_no,
-      company_name: `${verifiedRegNo.findCompany.company_name}`
+      company_name: `${verifiedRegNo.findCompany.company_name}`,
     });
 
     return res.status(200).json({
       message: `${verifiedRegNo.findCompany.company_name} is verified`,
       company_name: `${verifiedRegNo.findCompany.company_name}`,
       registration_Number: `${verifiedRegNo.findCompany.reg_no}`,
-      token
+      token,
     });
-  } catch (err:any) {
+  } catch (err: any) {
     console.log(err.message);
     return res.status(500).json({
       message: `Internal server error`,
@@ -55,11 +64,14 @@ export const verifyVendor = async (req: Request, res: Response, next: NextFuncti
   }
 };
 
-export const registerVendor = async (req: JwtPayload, res: Response, next: NextFunction) => {
+export const registerVendor = async (
+  req: JwtPayload,
+  res: Response,
+  next: NextFunction
+) => {
   try {
-   
     let newUser = req.body;
-  
+
     const error = zodSchema.safeParse(newUser);
     if (error.success === false) {
       res.status(400).send({
@@ -70,9 +82,9 @@ export const registerVendor = async (req: JwtPayload, res: Response, next: NextF
 
     const id = v4();
     const userId = req.regNo;
-    const compName = req.company_name
+    const compName = req.company_name;
     // const registeredBusiness = await axiosVerifyVendor(userId);
-    
+
     const {
       email,
       phone_no,
@@ -80,7 +92,6 @@ export const registerVendor = async (req: JwtPayload, res: Response, next: NextF
       restaurant_name,
       address,
       cover_image,
-    
     } = req.body;
 
     const verifyIfVendorExistByEmail = (await VendorInstance.findOne({
@@ -95,7 +106,7 @@ export const registerVendor = async (req: JwtPayload, res: Response, next: NextF
         message: `${email} is already in use`,
       });
     }
-    if(verifyIfVendorExistByRestaurantName){
+    if (verifyIfVendorExistByRestaurantName) {
       return res.status(400).json({
         message: `${restaurant_name} is already in use`,
       });
@@ -103,7 +114,7 @@ export const registerVendor = async (req: JwtPayload, res: Response, next: NextF
 
     const salt = await GenerateSalt();
     const password = await passWordGenerator(phone_no);
-    console.log('password is', password)
+    console.log("password is", password);
     const hash = await hashPassword(password, salt);
     const html = emailHtml(email, password);
 
@@ -153,14 +164,18 @@ export const registerVendor = async (req: JwtPayload, res: Response, next: NextF
 };
 
 // Vendor Creates Food
-export const vendorcreatesFood = async (req: JwtPayload, res: Response, next: NextFunction) => {
+export const vendorcreatesFood = async (
+  req: JwtPayload,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const vendorId = req.vendor.id;
 
     const { name, price, food_image, ready_time, description } = req.body;
 
-     // const venid = vendorId
-    
+    // const venid = vendorId
+
     const error = validateFoodSchema.safeParse(req.body);
     if (error.success === false) {
       res.status(400).send({
@@ -191,7 +206,7 @@ export const vendorcreatesFood = async (req: JwtPayload, res: Response, next: Ne
       ready_time,
       isAvailable: true,
       rating: 0,
-      description
+      description,
     })) as unknown as FoodAttributes;
 
     // console.log(newFood.vendorId);
@@ -209,7 +224,11 @@ export const vendorcreatesFood = async (req: JwtPayload, res: Response, next: Ne
 };
 
 // Vendor Get All Food
-export const vendorgetsAllHisFood = async (req: JwtPayload, res: Response, next: NextFunction) => {
+export const vendorgetsAllHisFood = async (
+  req: JwtPayload,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const vendorId = req.vendor.id;
     const allFood = await FoodInstance.findAll({
@@ -217,11 +236,11 @@ export const vendorgetsAllHisFood = async (req: JwtPayload, res: Response, next:
         vendorId: vendorId,
       },
     });
-    const count = allFood.length
+    const count = allFood.length;
     return res.status(200).json({
-       allFood,
-       count 
-      });
+      allFood,
+      count,
+    });
   } catch (err: any) {
     console.log(err.message);
     return res.status(500).json({
@@ -253,76 +272,78 @@ export const vendorGetsSingleFood = async (req: JwtPayload, res: Response) => {
 
 export const vendorLogin = async (req: Request, res: Response) => {
   try {
-    const {
-      email,
-      password
-    } = req.body
+    const { email, password } = req.body;
 
-    const validateVendor = vendorLoginSchema.safeParse({ email, password })
+    const validateVendor = vendorLoginSchema.safeParse({ email, password });
     if (validateVendor.success === false) {
       return res.status(400).send({
-        status: 'error',
+        status: "error",
         method: req.method,
-        message: validateVendor.error.issues
+        message: validateVendor.error.issues,
       });
     }
-    const vendor = await VendorInstance.findOne({ where: { email: email } }) as unknown as VendorAttributes
-    if (!vendor) return res.status(404).json({ message: `Vendor not found` })
+    const vendor = (await VendorInstance.findOne({
+      where: { email: email },
+    })) as unknown as VendorAttributes;
+    if (!vendor) return res.status(404).json({ message: `Vendor not found` });
 
     const validatePassword = await bcrypt.compare(password, vendor.password);
 
-    const token = await GenerateSignature({ email: vendor.email, id: vendor.id });
+    const token = await GenerateSignature({
+      email: vendor.email,
+      id: vendor.id,
+    });
     if (validatePassword) {
       return res.status(200).json({
-        status: 'Success',
+        status: "Success",
         method: req.method,
-        message: 'Login successful',
+        message: "Login successful",
         token,
-        vendor
-      })
+        vendor,
+      });
     }
-    return res.status(404).json({message: `Wrong Password` })
+    return res.status(404).json({ message: `Wrong Password` });
   } catch (error) {
     console.log(error);
     return res.status(500).json({
-      message: `Internal Server Error`
-    })
+      message: `Internal Server Error`,
+    });
   }
 };
-
 
 export const vendorChangePassword = async (req: JwtPayload, res: Response) => {
   try {
     const { oldPassword, newPassword, confirmPassword } = req.body;
-    console.log(req.body)
+    console.log(req.body);
     if (newPassword !== confirmPassword) {
       return res.status(400).json({
-        message: `Password Mismatch`
-      })
+        message: `Password Mismatch`,
+      });
     }
     const vendorid = req.vendor.id;
-    const vendor: any = await VendorInstance.findOne({
+    const vendor: any = (await VendorInstance.findOne({
       where: { id: vendorid },
-    }) as unknown as VendorAttributes;
+    })) as unknown as VendorAttributes;
 
-    const confirm = await bcrypt.compare(oldPassword, vendor.password)
-    if (!confirm) return res.status(400).json({
-      message: `Wrong Password`
-    })
+    const confirm = await bcrypt.compare(oldPassword, vendor.password);
+    if (!confirm)
+      return res.status(400).json({
+        message: `Wrong Password`,
+      });
     const token = await GenerateSignature({
       id: vendor.id,
-      email: vendor.email
-    })
-    res.cookie('token', token)
-    const new_salt = await GenerateSalt()
-    const hash = await hashPassword(newPassword, new_salt)
-    const updatedPassword = await VendorInstance.update(
+      email: vendor.email,
+    });
+    res.cookie("token", token);
+    const new_salt = await GenerateSalt();
+    const hash = await hashPassword(newPassword, new_salt);
+    const updatedPassword = (await VendorInstance.update(
       {
         password: hash,
-        salt: new_salt
+        salt: new_salt,
       },
       { where: { id: vendorid } }
-    ) as unknown as VendorAttributes;
+    )) as unknown as VendorAttributes;
 
     if (updatedPassword) {
       return res.status(200).json({
@@ -330,25 +351,26 @@ export const vendorChangePassword = async (req: JwtPayload, res: Response) => {
         id: vendor.id,
         email: vendor.email,
         role: vendor.role,
-        token
+        token,
       });
     }
     return res.status(400).json({
       message: "Unsuccessful, contact Admin",
-      vendor
+      vendor,
     });
   } catch (err: any) {
-    console.log(err.message)
+    console.log(err.message);
     return res.status(500).json({
-      message: `Internal Server Error`
-    })
+      message: `Internal Server Error`,
+    });
   }
 };
 
 export const vendorEditProfile = async (req: JwtPayload, res: Response) => {
   try {
     const vend = req.vendor.id;
-    const { email, restaurant_name, name_of_owner, address, phone_no } = req.body;
+    const { email, restaurant_name, name_of_owner, address, phone_no } =
+      req.body;
     //   const validateResult = updateSchema.validate(req.body, option);
     //   if (validateResult.error) {
     //     return res.status(400).json({
@@ -389,11 +411,13 @@ export const vendorEditProfile = async (req: JwtPayload, res: Response) => {
     }
 
     // Perform the update operation with the fields from updatedFields
-    const rowsAffected: any = await VendorInstance.update(updatedFields, {
+    const rowsAffected: any = (await VendorInstance.update(updatedFields, {
       where: { id: vend },
-    }) as unknown as VendorAttributes;
+    })) as unknown as VendorAttributes;
     if (rowsAffected) {
-      const vendor: JwtPayload = await VendorInstance.findOne({ where: { id: vend } }) as unknown as VendorAttributes
+      const vendor: JwtPayload = (await VendorInstance.findOne({
+        where: { id: vend },
+      })) as unknown as VendorAttributes;
       const token = await GenerateSignature({
         id: vendor.id,
         email: vendor.email,
@@ -431,9 +455,9 @@ export const vendorGetsProfile = async (req: JwtPayload, res: Response) => {
 };
 
 export const updateFood = async (req: JwtPayload, res: Response) => {
- // console.log( JwtPayload)
+  // console.log( JwtPayload)
   try {
-   const id = req.vendor.id;
+    const id = req.vendor.id;
     const { name, price, ready_time, description } = req.body;
     const [rowsUpdated, updatedFoods] = await FoodInstance.update(
       {
@@ -443,7 +467,7 @@ export const updateFood = async (req: JwtPayload, res: Response) => {
         description,
       },
       {
-        where: {id:id },
+        where: { id: id },
         returning: true,
       }
     );
@@ -471,7 +495,7 @@ export const updateFood = async (req: JwtPayload, res: Response) => {
 export const DeleteSingleFood = async (req: JwtPayload, res: Response) => {
   try {
     const id = req.vendor.id;
-    console.log(id)
+    console.log(id);
     const food = await FoodInstance.findOne({ where: { id: req.params.id } });
     if (!food)
       return res
@@ -486,231 +510,256 @@ export const DeleteSingleFood = async (req: JwtPayload, res: Response) => {
 };
 
 export const DeleteAllFood = async (req: JwtPayload, res: Response) => {
- 
-  try {   
-    const food = await FoodInstance.destroy({truncate:true});
-    
-      return res.status(200).json({ msg: `All vendors deleted successfully` });
-  
-   
+  try {
+    const food = await FoodInstance.destroy({ truncate: true });
+
+    return res.status(200).json({ msg: `All vendors deleted successfully` });
   } catch (err: any) {
     console.log(err.message);
     return res.status(500).json({ msg: `Internal Server Error` });
   }
 };
 
-export const changeStatus = async(req: JwtPayload, res: Response) => {
+export const changeStatus = async (req: JwtPayload, res: Response) => {
   try {
     const { orderId } = req.params;
 
     const order = await OrderInstance.findByPk(orderId);
 
     if (!order) {
-      return res.status(404).json({ message: 'Order not found' });
+      return res.status(404).json({ message: "Order not found" });
     }
 
     await order.markAsReady();
 
-    return res.json({ message: 'Order status updated to ready' });
+    return res.json({ message: "Order status updated to ready" });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: 'Internal server error' });
+    return res.status(500).json({ message: "Internal server error" });
   }
 };
 
 export const vendorGetsOrderCount = async (req: JwtPayload, res: Response) => {
   try {
     const vendorId = req.vendor.id;
-    const vendorOrders:any = await OrderInstance.findAll({ where: { vendorId: vendorId } }) as unknown as OrderAttributes
-    const vendor:any = await VendorInstance.findOne({where: {id:vendorId}})
-    const orders = vendor.orders
+    const vendorOrders: any = (await OrderInstance.findAll({
+      where: { vendorId: vendorId },
+    })) as unknown as OrderAttributes;
+    const vendor: any = await VendorInstance.findOne({
+      where: { id: vendorId },
+    });
+    const orders = vendor.orders;
     if (!vendorOrders) {
       return res.status(404).json({
-        message: `Vendor order not found`
-      })
+        message: `Vendor order not found`,
+      });
     } else if (vendorOrders) {
+      const orderCount = vendorOrders.length;
 
-      const orderCount = vendorOrders.length
-
-      return res.status(200).json({ 
+      return res.status(200).json({
         message: `Vendor's order fetched`,
         orderCount,
         vendorOrders,
-        orders
-    })
+        orders,
+      });
     }
-
   } catch (err: any) {
-    console.log(err.message)
-    return res.status(500).json({ message: `Internal server error` })
+    console.log(err.message);
+    return res.status(500).json({ message: `Internal server error` });
   }
-
-}
+};
 
 export const vendorTotalRevenue = async (req: JwtPayload, res: Response) => {
   try {
     const vendorId = req.vendor.id;
-    const vendorRevenue = await VendorInstance.findOne({ where: { id: vendorId } })
+    const vendorRevenue = await VendorInstance.findOne({
+      where: { id: vendorId },
+    });
     if (!vendorRevenue) {
       return res.status(404).json({
-        message: `Vendor's total revenue cannot be fetched`
-      })
+        message: `Vendor's total revenue cannot be fetched`,
+      });
     } else if (vendorRevenue) {
-
-      const totalRevenue = vendorRevenue.revenue
+      const totalRevenue = vendorRevenue.revenue;
       return res.status(200).json({
         message: `Vendor's total revenue fetched successfully`,
-        totalRevenue
-
-      })
+        totalRevenue,
+      });
     }
-  }
-  catch (error: any) {
+  } catch (error: any) {
     console.log(error.message);
     return res.status(500).json({ message: `Internal server error` });
-}
-}
+  }
+};
 
 export const vendorAvailability = async (req: JwtPayload, res: Response) => {
   try {
     const vendorId = req.vendor.id;
-    const availableVendor = await VendorInstance.findOne({ where: { id: vendorId } })
+    const availableVendor = await VendorInstance.findOne({
+      where: { id: vendorId },
+    });
     if (!availableVendor) {
       return res.status(404).json({
-        message: `Vendor not found`
-      })
-      
+        message: `Vendor not found`,
+      });
     } else if (availableVendor) {
       try {
         const newAvailability = !availableVendor.isAvailable;
         // const updateVendor= await VendorInstance.update({isAvailable: true }, {where: {id: vendorId}})
 
-        await VendorInstance.update({ isAvailable: newAvailability }, { where: { id: vendorId } });
+        await VendorInstance.update(
+          { isAvailable: newAvailability },
+          { where: { id: vendorId } }
+        );
 
         return res.status(200).json({
-          message: `Vendor availability status updated`
-        })
-      }
-      catch (err: any) {
-        console.log(err); return res.status(500).json({ message: `Internal server error` })
+          message: `Vendor availability status updated`,
+        });
+      } catch (err: any) {
+        console.log(err);
+        return res.status(500).json({ message: `Internal server error` });
       }
     }
-  }
-  catch (err: any) {
-    console.log(err)
+  } catch (err: any) {
+    console.log(err);
     return res.status(500).json({
-      message: `Internal server error`
-    })
+      message: `Internal server error`,
+    });
   }
-
-}
+};
 
 export const singleOrderDetails = async (req: JwtPayload, res: Response) => {
   try {
-    const orderId =  req.query.id;
-    const orderDetails = await OrderInstance.findOne({ where: { id: orderId } }) as unknown as OrderAttributes;
+    const orderId = req.query.id;
+
+    console.log(orderId);
+
+    // const orderDetails = await OrderInstance.findAll({
+    //   where: { id: orderId },
+    // });
+
+    const orderDetails = await OrderInstance.findAll({
+      where: { id: orderId },
+    });
+
     if (!orderDetails) {
       return res.status(404).json({
-        message: `Order not found`
-      })
+        message: `Order not found`,
+      });
     } else if (orderDetails) {
       return res.status(200).json({
+        status: "success",
         message: `Order details fetched`,
-        order: orderDetails
-      })
+        data: orderDetails,
+      });
     }
+  } catch (err: any) {
+    console.log(err);
+    return res.status(500).json({ message: `Internal server error` });
   }
-  catch (err: any) {
-    console.log(err); return res.status(500).json({ message: `Internal server error` })
-  }
-}
+};
 
-export const vendorGetHisPopularFoods = async (req: JwtPayload, res: Response) => {
+export const vendorGetHisPopularFoods = async (
+  req: JwtPayload,
+  res: Response
+) => {
   try {
-      let totalFoods = []
-      const id = req.vendor.id
-      const vendorsFoods:any = await FoodInstance.findAll({where: {vendorId: id}}) as unknown as FoodAttributes
-      if(vendorsFoods.length===0) return res.status(400).json({message: `No Foods found`})
-  for (let key of vendorsFoods) {
-    if (key.order_count >= 10) {
-      totalFoods.push({key, count:key.order_count});
+    let totalFoods = [];
+    const id = req.vendor.id;
+    const vendorsFoods: any = (await FoodInstance.findAll({
+      where: { vendorId: id },
+    })) as unknown as FoodAttributes;
+    if (vendorsFoods.length === 0)
+      return res.status(400).json({ message: `No Foods found` });
+    for (let key of vendorsFoods) {
+      if (key.order_count >= 10) {
+        totalFoods.push({ key, count: key.order_count });
+      }
     }
-  }
-  if(totalFoods.length === 0) return res.status(400).json({message: `No popular Foods found`})
-  return res.status(200).json({
+    if (totalFoods.length === 0)
+      return res.status(400).json({ message: `No popular Foods found` });
+    return res.status(200).json({
       message: `Popular Foods fetched`,
-      totalFoods
-  })
+      totalFoods,
+    });
   } catch (error: any) {
-      console.log(error.message);
-      return res.status(500).json({ message: `Internal server error` });
+    console.log(error.message);
+    return res.status(500).json({ message: `Internal server error` });
   }
-
-}
+};
 
 export const vendorTotalEarnings = async (req: JwtPayload, res: Response) => {
   try {
     const vendorId = req.vendor.id;
-    const vendor = await VendorInstance.findOne({ where: { id: vendorId } }) as unknown as VendorAttributes
+    const vendor = (await VendorInstance.findOne({
+      where: { id: vendorId },
+    })) as unknown as VendorAttributes;
     if (!vendor) {
       return res.status(404).json({
-        message: `Vendor's total earnings cannot be fetched`
-      })
+        message: `Vendor's total earnings cannot be fetched`,
+      });
     } else if (vendor) {
-      const totalEarning = vendor.earnings
+      const totalEarning = vendor.earnings;
       return res.status(200).json({
         message: `Vendor's total earnings fetched successfully`,
-        totalEarning
-      })
+        totalEarning,
+      });
     }
-  }
-  catch (err: any) {
-    console.log(err)
+  } catch (err: any) {
+    console.log(err);
     return res.status(500).json({
-      message: `Internal server error`
-    })
+      message: `Internal server error`,
+    });
   }
-}
+};
 
-export const orderByFood = async (req:JwtPayload, res:Response)=>{
-  try{
+export const orderByFood = async (req: JwtPayload, res: Response) => {
+  try {
     const vId = req.vendor.id;
     let vendorFoodArr = [];
-    const vendorFoods:any = await FoodInstance.findAll({where: {vendorId:vId}}) as unknown as FoodAttributes
-    if(vendorFoods.length === 0) return res.status(404).json({
-      message: `Vendor has no food`
-    })
+    const vendorFoods: any = (await FoodInstance.findAll({
+      where: { vendorId: vId },
+    })) as unknown as FoodAttributes;
+    if (vendorFoods.length === 0)
+      return res.status(404).json({
+        message: `Vendor has no food`,
+      });
     for (let key of vendorFoods) {
-      vendorFoodArr.push({key, count:key.order_count})
+      vendorFoodArr.push({ key, count: key.order_count });
     }
     return res.status(200).json({
       message: `Foods fetched by Orders`,
-      vendorFoodArr
-  })
-  }catch(err:any){
-    console.log(err.message)
+      vendorFoodArr,
+    });
+  } catch (err: any) {
+    console.log(err.message);
     return res.status(500).json({
-      message: `Internal Server Error`
-    })
+      message: `Internal Server Error`,
+    });
   }
-}
+};
 
-export const earningsAndRevenue = async (req:JwtPayload, res:Response)=>{
-  try{
+export const earningsAndRevenue = async (req: JwtPayload, res: Response) => {
+  try {
     const id = req.vendor.id;
-    const vendor = await VendorInstance.findOne({where: {id:id}}) as unknown as VendorAttributes;
-    if(!vendor) return res.status(404).json({message: `Details not fetched`})
+    const vendor = (await VendorInstance.findOne({
+      where: { id: id },
+    })) as unknown as VendorAttributes;
+    if (!vendor)
+      return res.status(404).json({ message: `Details not fetched` });
     const earningRevenueArray = [];
-    earningRevenueArray.push({earnings: vendor.earnings, revenue:
-    vendor.revenue})
+    earningRevenueArray.push({
+      earnings: vendor.earnings,
+      revenue: vendor.revenue,
+    });
     return res.status(200).json({
-  message: `Details fetched`,
-  earningRevenueArray
-})
-  }catch(err:any){
-    console.log(err.message)
+      message: `Details fetched`,
+      earningRevenueArray,
+    });
+  } catch (err: any) {
+    console.log(err.message);
     return res.status(500).json({
-      message: `Internal Server Error`
-    })
+      message: `Internal Server Error`,
+    });
   }
-}
+};
