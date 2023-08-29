@@ -147,7 +147,6 @@ export const registerVendor = async (
         where: { id: id },
       })) as unknown as VendorAttributes;
       await sendmail(GMAIL_USER!, email, "Welcome", html);
-      console.log(newVendor);
       const token = await GenerateSignature({ email: vend.email, id: vend.id });
       res.cookie("token", token);
       return res.status(200).json({

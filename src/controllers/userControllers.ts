@@ -649,10 +649,9 @@ export const userMakeOrder = async (
 };
 
 export const userEditProfile = async (req: JwtPayload, res: Response) => {
-  try {
-    console.log(req.user);
-    const userId = req.user.payload.id;
-    const { email, firstname, lastname, address, phone_no } = req.body;
+    try {
+        const userId = req.user.payload.id
+        const { email, firstname, lastname, address, phone_no } = req.body;
 
     const user2 = (await UserInstance.findOne({
       where: { id: userId },

@@ -40,5 +40,5 @@ router.get("/getNewFoods", userGetsNewFoods);
 router.get("/pendingOrders", auth, userGetsPendingOrders);
 router.put("/editprofile", auth, userEditProfile);
 router.post("/changePassword", auth, userChangePassword);
-router.get("/userGetsAllOrders", userGetsAllOrders);
+router.get("/userGetsAllOrders", auth, userGetsAllOrders);
 export default router;
