@@ -28,8 +28,8 @@ export const authForVerifiedVendor = async(req:JwtPayload, res:Response, next:Ne
         data: "You have not been verified"
     })
 
-    req.regNo = decoded.regNo;
-    req.company_name = decoded.company_name
+    req.regNo = decoded.payload.regNo;
+    req.company_name = decoded.payload.company_name
    
     return next()
 } catch(err){
