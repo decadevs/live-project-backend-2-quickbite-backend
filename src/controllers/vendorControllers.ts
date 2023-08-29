@@ -28,7 +28,7 @@ export const verifyVendor = async (req: Request, res: Response, next: NextFuncti
         message: `${regNo} is not valid`,
       });
     }
-    
+
     const verifiedRegNo = await axiosVerifyVendor(regNo);
     if (verifiedRegNo === "not found") {
       return res.status(404).json({
