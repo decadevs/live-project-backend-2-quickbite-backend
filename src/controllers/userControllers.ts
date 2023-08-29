@@ -584,7 +584,6 @@ export const userChangeOrderStatus = async (req: JwtPayload, res: Response) => {
 
 export const userEditProfile = async (req: JwtPayload, res: Response) => {
     try {
-        console.log(req.user)
         const userId = req.user.payload.id
         const { email, firstname, lastname, address, phone_no } = req.body;
 
