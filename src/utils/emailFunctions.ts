@@ -72,14 +72,13 @@ export const mailUserOtp = async(params:Mail_Params)=>{
                 <p style="
                 margin-bottom:30px;"
                 >Please enter the OTP to complete your sign up <br><br>
-                Thank You<br>
-                TEAM QUICKBITE</p>
-
-                <h1 style="
+                <span style="
                 font-size:40px;
                 lettre-spacing:2px;
                 text-align:center;
-                ">${params.OTP}</h1>
+                ">${params.OTP}</span><br><br>
+                Thank You<br>
+                TEAM QUICKBITE</p>
             </div>`
         })
 
