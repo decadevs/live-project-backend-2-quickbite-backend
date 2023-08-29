@@ -798,7 +798,7 @@ export const userChangePassword = async (req: JwtPayload, res: Response) => {
 export const userGetsAllOrders = async (req: JwtPayload, res: Response) => {
   try {
     const userId = req.user.payload.id;
-    const userOrders = await FoodInstance.findAll({ where: { id: userId } });
+    const userOrders = await OrderInstance.findAll({ where: { userId: userId } });
     if (!userOrders) {
       return res.status(404).json({ message: `Orders not found` });
     }
