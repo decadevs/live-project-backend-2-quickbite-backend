@@ -25,10 +25,11 @@ import { Op } from "sequelize";
 export const userGetsAllFoods = async (req: JwtPayload, res: Response) => {
   try {
     const allFood = await FoodInstance.findAll({});
-    if (!allFood) return res.status(404).json({ msg: `Foods not found` });
+    if (!allFood) return res.status(404).json({ message: `Foods not found` });
+    const allFoodarr = [...allFood]
     return res.status(200).json({
       message: `All foods fetched`,
-      allFood,
+      allFoodarr,
     });
   } catch (error: any) {
     console.log(error.message);
@@ -728,7 +729,7 @@ export const userGetsNewFoods = async (req: JwtPayload, res: Response) => {
     });
 
     if (recentFoods.length === 0) {
-      return res.status(404).json({ msg: `No recent foods found` });
+      return res.status(404).json({ message: `No recent foods found` });
     }
 
     return res.status(200).json({
@@ -737,7 +738,7 @@ export const userGetsNewFoods = async (req: JwtPayload, res: Response) => {
     });
   } catch (error: any) {
     console.log(error.message);
-    return res.status(500).json({ msg: `Internal server error` });
+    return res.status(500).json({ message: `Internal server error` });
   }
 };
 
