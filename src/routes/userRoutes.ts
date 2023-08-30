@@ -17,6 +17,7 @@ import {
   userChangeOrderStatus,
   userEditProfile,
   userGetsAllOrders,
+  getSingleVendor,
 } from "../controllers/userControllers";
 import { Router } from "express";
 import { auth } from "../middleware/authorizations";
@@ -41,4 +42,5 @@ router.get("/pendingOrders", auth, userGetsPendingOrders);
 router.put("/editprofile", auth, userEditProfile);
 router.post("/changePassword", auth, userChangePassword);
 router.get("/userGetsAllOrders", auth, userGetsAllOrders);
+router.get('/getSingleVendor/:id', getSingleVendor)
 export default router;
