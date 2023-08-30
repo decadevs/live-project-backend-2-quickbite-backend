@@ -41,7 +41,7 @@ export const userGetsAllFoodByAVendor = async (
   res: Response
 ) => {
   try {
-    const vendorId = req.query.vendorId;
+    const vendorId = req.query.id;
 
     if (!vendorId) {
       return res
@@ -59,7 +59,7 @@ export const userGetsAllFoodByAVendor = async (
     if (allFood) {
       return res.status(200).json({
         message: `All foods fetched for this vendor`,
-        allFood,
+        data:allFood,
       });
     }
   } catch (error: any) {
@@ -813,4 +813,36 @@ export const userGetsAllOrders = async (req: JwtPayload, res: Response) => {
     console.log(error.message);
     return res.status(500).json({ message: `Internal server error` });
   }
+};
+
+export const getSingleVendor = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+      const vendorId = req.params.id
+
+    const vendor = await VendorInstance.findAll({where: {id: vendorId}});
+
+    if(!vendor){
+      return res.status(400).send({
+          status: "error",
+          method: req.method,
+          message:"vendor not found"
+      }) 
+    }
+
+  return res.status(200).json({
+    status: "success",
+    method: req.method,
+    message: "retrievd vendor successfully",
+    data:vendor[0],
+  });
+} catch (err) {
+  console.error("Error executing getUsers:", err);
+  return res.status(500).json({
+    Error: "Internal Server Error",
+  });
+}
 };
