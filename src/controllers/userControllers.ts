@@ -24,12 +24,11 @@ import { Op } from "sequelize";
 
 export const userGetsAllFoods = async (req: JwtPayload, res: Response) => {
   try {
-    const allFood = await FoodInstance.findAll({});
-    if (!allFood) return res.status(404).json({ message: `Foods not found` });
-    const allFoodarr = [...allFood]
+    const allFoodarr = await FoodInstance.findAll({});
+    if (!allFoodarr) return res.status(404).json({ message: `Foods not found` });
     return res.status(200).json({
       message: `All foods fetched`,
-      allFoodarr,
+      allFoodarr
     });
   } catch (error: any) {
     console.log(error.message);
