@@ -368,6 +368,7 @@ export const userLogIn = async (
       });
     }
   } catch (error: any) {
+    console.log(error.message)
     return res.status(400).json({
       status: "error",
       method: req.method,
@@ -577,9 +578,10 @@ export const userMakeOrder = async (
   next: NextFunction
 ) => {
   try {
-    const { food_items, cartTotal, address } = req.body;
+    const { items, cartTotal, address } = req.body;
+    console.log(items)
     const userid = req.user.payload.id;
-    const foodid = food_items[0].id;
+    const foodid = items[0].id;
     const food = (await FoodInstance.findOne({
       where: { id: foodid },
     })) as unknown as FoodAttributes;
@@ -600,9 +602,9 @@ export const userMakeOrder = async (
     let vendorEarn = cartTotal2 - companyEarn;
     vendor.earnings += vendorEarn;
     await vendor.save();
-    for (const food of food_items) {
+    for (let i = 0; i<items.length; i++) {
       const foodInstance: any = await FoodInstance.findOne({
-        where: { id: food.id },
+        where: { id: items[i].id },
       });
       if (foodInstance) {
         foodInstance.order_count += 1;
@@ -619,7 +621,7 @@ export const userMakeOrder = async (
 
     const order = (await OrderInstance.create({
       id: orderId,
-      food_items: food_items,
+      food_items: items,
       amount: Number(cartTotal),
       vendorId: vendor.id,
       address: address,
