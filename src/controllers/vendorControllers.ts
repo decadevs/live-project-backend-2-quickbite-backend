@@ -548,7 +548,15 @@ export const vendorGetsOrderCount = async (req: JwtPayload, res: Response) => {
     const vendor: any = await VendorInstance.findOne({
       where: { id: vendorId },
     });
-    const orders = vendor.orders;
+    const orders = vendorOrders.map((a:any)=>a.food_items)
+    const food1 = orders.map((a:any)=>{
+      return Object.values(a)
+    })
+    let foodArr:any = [];
+    for(let i = 0; i<food1.length; i++){
+      foodArr = Object.values(food1[i])
+    }
+    console.log(foodArr)
     if (!vendorOrders) {
       return res.status(404).json({
         message: `Vendor order not found`,
@@ -561,6 +569,7 @@ export const vendorGetsOrderCount = async (req: JwtPayload, res: Response) => {
         orderCount,
         vendorOrders,
         orders,
+        foodArr
       });
     }
   } catch (err: any) {
