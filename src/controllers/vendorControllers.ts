@@ -29,15 +29,15 @@ export const verifyVendor = async (
         message: `Registration Number is required`,
       });
     }
-
+    
     const validateRegNo = /^AC-\d{8}$/;
-
+    
     if (!validateRegNo.test(regNo)) {
       return res.status(400).json({
         message: `${regNo} is not valid`,
       });
     }
-
+    
     const verifiedRegNo = await axiosVerifyVendor(regNo);
     if (verifiedRegNo === "not found") {
       return res.status(404).json({

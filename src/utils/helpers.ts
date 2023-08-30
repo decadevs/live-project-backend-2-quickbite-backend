@@ -7,7 +7,6 @@ export const axiosVerifyVendor = async (reg_numnber:string)=>{
   try {
     const url = `https://business-name-verifier.onrender.com/company/getsingle?reg_number=${reg_numnber}`;
     const response = await axios.get(url);
-    //console.log(response.data)
     return response.data;
   } catch (error:any) {
     // Handle the error here
