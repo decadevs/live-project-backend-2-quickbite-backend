@@ -539,8 +539,8 @@ export const changeStatus = async (req: JwtPayload, res: Response) => {
     await order.markAsReady();
 
     return res.json({ message: "Order status updated to ready" });
-  } catch (error) {
-    console.error(error);
+  } catch (error:any){
+    console.error(error.message);
     return res.status(500).json({ message: "Internal server error" });
   }
 };
