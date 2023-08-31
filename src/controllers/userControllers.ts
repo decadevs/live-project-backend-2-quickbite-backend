@@ -449,7 +449,6 @@ export const getSingleVendors = async (
   }
 };
 
-// newly added functions
 export const userGetFulfilledOrders = async (
   req: JwtPayload,
   res: Response
@@ -569,8 +568,6 @@ export const userChangeOrderStatus = async (req: JwtPayload, res: Response) => {
     });
   }
 };
-
-// newly added functions
 
 export const userMakeOrder = async (
   req: JwtPayload,
@@ -824,7 +821,7 @@ export const userGetsAllOrders = async (req: JwtPayload, res: Response) => {
     }
     return res.status(200).json({
       message: `All orders fetched`,
-      foodArr,
+      data: foodArr,
     });
   } catch (error: any) {
     console.log(error.message);
