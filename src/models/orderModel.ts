@@ -11,6 +11,7 @@ interface FoodDetails {
   id: string
   price: number
   quantity: number
+  status: string
 }
 
 export interface OrderAttributes {
