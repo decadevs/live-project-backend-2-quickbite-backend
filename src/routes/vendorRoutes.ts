@@ -27,6 +27,7 @@ import {
   changeStatus,
   updateFood,
   earningsAndRevenue,
+  DeleteSingleOrder
 } from "../controllers/vendorControllers";
 
 const router = express.Router();
@@ -62,11 +63,12 @@ router.delete("/", vendorauth, DeleteAllFood);
 router.get("/vendororders", vendorauth, vendorGetsOrderCount);
 router.get("/revenuevendor", vendorauth, vendorTotalRevenue);
 router.put("/availablevendor", vendorauth, vendorAvailability);
-router.get("/singleorder", singleOrderDetails);
+router.get("/singleorder/:id", singleOrderDetails);
 router.get("/popularfoods", vendorauth, vendorGetHisPopularFoods);
 router.get("/totalearnings", vendorauth, vendorTotalEarnings);
 router.get("/orderbyfood", vendorauth, orderByFood);
 router.get("/earningsandrevenue", vendorauth, earningsAndRevenue);
+router.delete('/deleteorder/:orderid', vendorauth, DeleteSingleOrder)
 export default router;
 
 // vendorauth,
