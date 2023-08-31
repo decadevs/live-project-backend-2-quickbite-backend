@@ -634,6 +634,7 @@ export const userMakeOrder = async (
       isPaid: true,
     })) as unknown as OrderAttributes;
     if (order) {
+        const vendor = await VendorInstance.findOne({where:{id:order.vendorId}})
       mailOrder(userEmail);
       mailVendorOrder(vendorEmail);
       return res.status(200).json({

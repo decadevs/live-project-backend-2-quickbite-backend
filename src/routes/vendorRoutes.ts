@@ -57,7 +57,7 @@ router.put(
 router.put("/editfood/:id", vendorauth, updateFood);
 router.put("/:foodID/ready", vendorauth, changeStatus);
 router.get("/getsingleprofile", vendorauth, vendorGetsProfile);
-router.delete("/:foodid/ready", vendorauth, DeleteSingleFood);
+router.delete("/deletefood/:foodid", vendorauth, DeleteSingleFood);
 router.delete("/", vendorauth, DeleteAllFood);
 router.get("/vendororders", vendorauth, vendorGetsOrderCount);
 router.get("/revenuevendor", vendorauth, vendorTotalRevenue);
