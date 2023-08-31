@@ -446,8 +446,9 @@ export const vendorGetsProfile = async (req: JwtPayload, res: Response) => {
     const userId = req.vendor.id;
     const vendor = await VendorInstance.findOne({ where: { id: userId } });
     if (!vendor) return res.status(404).json({ message: `Vendor not found` });
+    let arr = [vendor];
 
-    return res.status(200).json({ message: `Here is your profile`, vendor });
+    return res.status(200).json({ message: `Here is your profile`, vendor, arr });
   } catch (err: any) {
     console.log(err.message);
     return res.status(500).json({ message: `Internal Server Error` });
@@ -506,7 +507,7 @@ export const DeleteSingleFood = async (req: JwtPayload, res: Response) => {
     if (!food)
       return res
         .status(404)
-        .json({ message: `Food with not found` });
+        .json({ message: `Food not found` });
     await FoodInstance.destroy({ where: { id: foodId } });
     return res.status(200).json({ message: `Food was deleted successfully` });
   } catch (err: any) {
@@ -644,17 +645,17 @@ export const vendorAvailability = async (req: JwtPayload, res: Response) => {
 
 export const singleOrderDetails = async (req: JwtPayload, res: Response) => {
   try {
-    const orderId = req.query.id;
+    const orderId = req.params.id;
 
-    console.log(orderId);
-
+    
     // const orderDetails = await OrderInstance.findAll({
-    //   where: { id: orderId },
-    // });
-
-    const orderDetails = await OrderInstance.findAll({
-      where: { id: orderId },
-    });
+      //   where: { id: orderId },
+      // });
+      
+      const orderDetails = await OrderInstance.findOne({
+        where: { id: orderId },
+      }) as unknown as OrderAttributes
+      console.log('orderid', orderDetails);
 
     if (!orderDetails) {
       return res.status(404).json({
@@ -776,5 +777,23 @@ export const earningsAndRevenue = async (req: JwtPayload, res: Response) => {
     return res.status(500).json({
       message: `Internal Server Error`,
     });
+  }
+};
+
+export const DeleteSingleOrder = async (req: JwtPayload, res: Response) => {
+  try {
+    const id = req.vendor.id;
+    const orderid = req.params.orderid
+    const order = await OrderInstance.findOne({ where: { id: orderid} });
+    console.log(orderid);
+    if (!order)
+      return res
+        .status(404)
+        .json({ message: `Order not found` });
+    await OrderInstance.destroy({ where: { id: orderid } });
+    return res.status(200).json({ message: `Order was deleted successfully` });
+  } catch (err: any) {
+    console.log(err.message);
+    return res.status(500).json({ message: `Internal Server Error` });
   }
 };
