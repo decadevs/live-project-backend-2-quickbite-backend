@@ -582,7 +582,6 @@ export const userMakeOrder = async (
     for(let i = 0; i<items.length; i++){
         items[i].status = 'pending'
     }
-    console.log(items)
     const userid = req.user.payload.id;
     const foodid = items[0].id;
     const food = (await FoodInstance.findOne({
@@ -601,8 +600,10 @@ export const userMakeOrder = async (
     vendor.orders += 1;
     let cartTotal2 = Number(cartTotal);
     vendor.revenue += Number(cartTotal2);
-    let companyEarn = cartTotal2 * 0.05;
-    let vendorEarn = cartTotal2 - companyEarn;
+    let companyEarn = cartTotal2 * 0.07;
+    let tax = cartTotal * 0.02;
+    let deductions = companyEarn + tax
+    let vendorEarn = cartTotal2 - deductions;
     vendor.earnings += vendorEarn;
     await vendor.save();
     for (let i = 0; i<items.length; i++) {
@@ -807,12 +808,22 @@ export const userGetsAllOrders = async (req: JwtPayload, res: Response) => {
     if (!userOrders) {
       return res.status(404).json({ message: `Orders not found` });
     }
-    if (userOrders.length === 0) {
+    const arr = []
+    arr.push(userOrders)
+    if (arr.length === 0) {
       return res.status(404).json({ message: `You do not have any orders` });
+    }
+    const orders = userOrders.map((a:any)=>a.food_items)
+    const food1 = orders.map((a:any)=>{
+      return Object.values(a)
+    })
+    let foodArr:any = [];
+    for(let i = 0; i<food1.length; i++){
+      foodArr = Object.values(food1[i])
     }
     return res.status(200).json({
       message: `All orders fetched`,
-      userOrders,
+      foodArr,
     });
   } catch (error: any) {
     console.log(error.message);
