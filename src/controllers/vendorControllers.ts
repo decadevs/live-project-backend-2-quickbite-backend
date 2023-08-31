@@ -34,7 +34,7 @@ export const verifyVendor = async (
     
     if (!validateRegNo.test(regNo)) {
       return res.status(400).json({
-        message: `${regNo} is not valid`,
+        message: `${regNo} is not a valid registration number`,
       });
     }
     

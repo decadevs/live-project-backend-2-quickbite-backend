@@ -579,6 +579,9 @@ export const userMakeOrder = async (
 ) => {
   try {
     const { items, cartTotal, address } = req.body;
+    for(let i = 0; i<items.length; i++){
+        items[i].status = 'pending'
+    }
     console.log(items)
     const userid = req.user.payload.id;
     const foodid = items[0].id;
@@ -642,8 +645,8 @@ export const userMakeOrder = async (
       method: req.method,
       message: "order not created",
     });
-  } catch (err) {
-    console.error("Error making order:", err);
+  } catch (err:any) {
+    console.error("Error making order:", err.message);
     return res.status(500).json({
       Error: "Internal Server Error",
     });

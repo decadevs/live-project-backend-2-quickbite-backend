@@ -34,8 +34,6 @@ db.sync({}).then( ()=>{
     console.log(err);
 })
 
-
-
 app.use("/vendor", vendorRoutes)
 app.use('/user', userRoutes)
 
