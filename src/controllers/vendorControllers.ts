@@ -556,7 +556,6 @@ export const vendorGetsOrderCount = async (req: JwtPayload, res: Response) => {
     for(let i = 0; i<food1.length; i++){
       foodArr = Object.values(food1[i])
     }
-    console.log(foodArr)
     if (!vendorOrders) {
       return res.status(404).json({
         message: `Vendor order not found`,
@@ -681,8 +680,8 @@ export const vendorGetHisPopularFoods = async (
     if (vendorsFoods.length === 0)
       return res.status(400).json({ message: `No Foods found` });
     for (let key of vendorsFoods) {
-      if (key.order_count >= 10) {
-        totalFoods.push({ key, count: key.order_count });
+      if (key.order_count >= 1) {
+        totalFoods.push(key);
       }
     }
     if (totalFoods.length === 0)
@@ -756,6 +755,7 @@ export const earningsAndRevenue = async (req: JwtPayload, res: Response) => {
     })) as unknown as VendorAttributes;
     if (!vendor)
       return res.status(404).json({ message: `Details not fetched` });
+    console.log(vendor.orders)
     const earningRevenueArray = [];
     earningRevenueArray.push({
       earnings: vendor.earnings,
