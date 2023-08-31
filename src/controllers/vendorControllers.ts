@@ -458,54 +458,60 @@ export const updateFood = async (req: JwtPayload, res: Response) => {
   // console.log( JwtPayload)
   try {
     const id = req.vendor.id;
-    const { name, price, ready_time, description } = req.body;
-    const [rowsUpdated, updatedFoods] = await FoodInstance.update(
-      {
-        name,
-        price,
-        ready_time,
-        description,
-      },
-      {
-        where: { id: id },
-        returning: true,
-      }
-    );
-
-    if (rowsUpdated === 0) {
-      return res.status(401).send({
-        Message: `Food with id ${id} does not exist`,
-      });
+    const vendor = await VendorInstance.findOne({where:{id:id}}) as unknown as VendorAttributes
+    const foodid = req.params.id
+    let { name, price, ready_time, description } = req.body;
+    const updatedFields: Partial<FoodAttributes> = {};
+    let a;
+    if (name !== "") {
+      updatedFields.name = name;
     }
-
-    const updatedFood = updatedFoods[0];
+    if (price !== "") {
+      updatedFields.price = Number(price);
+      a = updatedFields.price
+    }
+    if (ready_time !== "") {
+      updatedFields.ready_time = ready_time;
+    }
+    if (description !== "") {
+      updatedFields.description = description;
+    }
+    const rowsAffected: any = (await FoodInstance.update(updatedFields, {
+      where: { id: foodid },
+    })) as unknown as FoodAttributes;
+    const token = await GenerateSignature({
+      id: vendor.id,
+      email: vendor.email,
+    });
 
     return res.status(200).send({
       Status: "success",
       Method: req.method,
-      Message: `Food with id ${id} updated successfully`,
-      updatedFood,
+      message: `Food updated successfully`,
+      rowsAffected,
+      token
     });
-  } catch (error) {
-    console.log(error);
-    res.status(500).send({ Message: "Internal Server Error" });
+  } catch (error:any) {
+    console.log(error.message);
+    res.status(500).send({ message: "Internal Server Error" });
   }
 };
 
 export const DeleteSingleFood = async (req: JwtPayload, res: Response) => {
   try {
     const id = req.vendor.id;
-    console.log(id);
-    const food = await FoodInstance.findOne({ where: { id: req.params.id } });
+    const foodId = req.params.foodid
+    console.log(foodId);
+    const food = await FoodInstance.findOne({ where: { id: foodId} });
     if (!food)
       return res
         .status(404)
-        .json({ message: `Food with id ${req.params.id} not found` });
-    await FoodInstance.destroy({ where: { id: req.params.id } });
-    return res.status(200).json({ msg: `Food was deleted successfully` });
+        .json({ message: `Food with not found` });
+    await FoodInstance.destroy({ where: { id: foodId } });
+    return res.status(200).json({ message: `Food was deleted successfully` });
   } catch (err: any) {
     console.log(err.message);
-    return res.status(500).json({ msg: `Internal Server Error` });
+    return res.status(500).json({ message: `Internal Server Error` });
   }
 };
 
@@ -513,10 +519,10 @@ export const DeleteAllFood = async (req: JwtPayload, res: Response) => {
   try {
     const food = await FoodInstance.destroy({ truncate: true });
 
-    return res.status(200).json({ msg: `All vendors deleted successfully` });
+    return res.status(200).json({ message: `All vendors deleted successfully` });
   } catch (err: any) {
     console.log(err.message);
-    return res.status(500).json({ msg: `Internal Server Error` });
+    return res.status(500).json({ message: `Internal Server Error` });
   }
 };
 
