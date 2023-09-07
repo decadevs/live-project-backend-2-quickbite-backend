@@ -1,4 +1,5 @@
-import express from "express"
+import express, { NextFunction } from "express"
+import { Request, Response } from 'express';
 import dotenv from "dotenv"
 import {db} from "./config"
 import {HttpError} from 'http-errors';
@@ -10,6 +11,8 @@ import logger from 'morgan';
 import path from 'path';
 import userRoutes from './routes/userRoutes'
 import bodyParser from 'body-parser'
+import { FoodInstance } from "./models/foodModel";
+import { VendorInstance } from "./models/vendorModel";
 
 
 
@@ -36,7 +39,16 @@ db.sync({}).then( ()=>{
 
 app.use("/vendor", vendorRoutes)
 app.use('/user', userRoutes)
-
+app.get('/', async (req:Request, res:Response)=>{
+        console.log('get')
+        const allFoods = await FoodInstance.findAll({})
+        const allVendors = await VendorInstance.findAll({})
+        return res.status(200).json({
+            message: `All Foods Fetched`,
+            Foods: allFoods,
+            Restaurants: allVendors
+        })
+    })
 // const {DB_PORT} = process.env
 // console.log(DB_PORT);
 

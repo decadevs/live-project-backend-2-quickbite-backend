@@ -14,6 +14,8 @@ const morgan_1 = __importDefault(require("morgan"));
 const path_1 = __importDefault(require("path"));
 const userRoutes_1 = __importDefault(require("./routes/userRoutes"));
 const body_parser_1 = __importDefault(require("body-parser"));
+const foodModel_1 = require("./models/foodModel");
+const vendorModel_1 = require("./models/vendorModel");
 const { PORT } = dbConfig_1.default;
 dotenv_1.default.config();
 const app = (0, express_1.default)();
@@ -31,6 +33,16 @@ config_1.db.sync({}).then(() => {
 });
 app.use("/vendor", vendorRoutes_1.default);
 app.use('/user', userRoutes_1.default);
+app.get('/', async (req, res) => {
+    console.log('get');
+    const allFoods = await foodModel_1.FoodInstance.findAll({});
+    const allVendors = await vendorModel_1.VendorInstance.findAll({});
+    return res.status(200).json({
+        message: `All Foods Fetched`,
+        Foods: allFoods,
+        Restaurants: allVendors
+    });
+});
 // const {DB_PORT} = process.env
 // console.log(DB_PORT);
 app.listen(PORT, () => {
