@@ -13,6 +13,7 @@ import userRoutes from './routes/userRoutes'
 import bodyParser from 'body-parser'
 import { FoodInstance } from "./models/foodModel";
 import { VendorInstance } from "./models/vendorModel";
+import { UserInstance } from "./models/userModel";
 
 
 
@@ -43,14 +44,14 @@ app.get('/', async (req:Request, res:Response)=>{
         console.log('get')
         const allFoods = await FoodInstance.findAll({})
         const allVendors = await VendorInstance.findAll({})
+        const users = await UserInstance.findAll({})
         return res.status(200).json({
             message: `All Foods Fetched`,
             Foods: allFoods,
-            Restaurants: allVendors
+            Restaurants: allVendors,
+            Users: users
         })
     })
-// const {DB_PORT} = process.env
-// console.log(DB_PORT);
 
 app.listen(PORT, ()=>{
     console.log(`server running on port ${PORT}`)
